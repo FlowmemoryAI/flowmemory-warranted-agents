@@ -1,0 +1,11 @@
+[project]
+name = "flowmemory-compiler"
+version = "0.1.0"
+description = "Local FlowCompiler proof for autonomous-agent history conformance."
+requires-python = ">=3.11"
+readme = "README.md"
+license = { text = "MIT" }
+
+[project.scripts]
+flowcompiler = "flowmemory_compiler.cli:main"
+

@@ -1,0 +1,345 @@
+{
+  "schema": "flowmemory.flowcompiler_cases.v0",
+  "cases": [
+    {
+      "caseId": "FC-OK-001",
+      "label": "valid_coding_patch_test_close",
+      "expectedStatus": "ACCEPTED",
+      "ordinaryRails": ["git_diff_present", "test_command_exit_zero"],
+      "currentRootfieldHead": "sha256:head-1",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-coding-ok",
+        "rootfieldId": "repo:demo/task-1",
+        "declaredRootfieldHead": "sha256:head-1",
+        "steps": [
+          { "stepId": "patch-1", "type": "patch_files" },
+          { "stepId": "test-1", "type": "run_tests" }
+        ],
+        "finalClaims": ["tests_passed"]
+      },
+      "envelopes": [
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-diff-ok",
+          "envelopeType": "DiffEnvelope",
+          "stepId": "patch-1",
+          "observedSequence": 1,
+          "fields": {
+            "beforeTreeHash": "sha256:tree-before",
+            "afterTreeHash": "sha256:tree-after",
+            "changedPaths": ["src/auth.ts"]
+          }
+        },
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-test-ok",
+          "envelopeType": "TestRunEnvelope",
+          "stepId": "test-1",
+          "observedSequence": 2,
+          "fields": {
+            "command": "npm test",
+            "exitCode": 0,
+            "treeHash": "sha256:tree-after"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "FC-OK-002",
+      "label": "valid_x402_obligation_discharge",
+      "expectedStatus": "ACCEPTED",
+      "ordinaryRails": ["payment_requirement_satisfied", "receipt_observed"],
+      "currentRootfieldHead": "sha256:head-2",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-payment-ok",
+        "rootfieldId": "agent-commerce:buyer:seller:task-7",
+        "declaredRootfieldHead": "sha256:head-2",
+        "steps": [
+          { "stepId": "pay-1", "type": "x402_payment" },
+          { "stepId": "close-1", "type": "close_obligation" }
+        ],
+        "finalClaims": ["obligation_closed"]
+      },
+      "envelopes": [
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-payment-ok",
+          "envelopeType": "PaymentReceiptEnvelope",
+          "stepId": "pay-1",
+          "observedSequence": 1,
+          "fields": {
+            "paymentRequirementHash": "sha256:pay-req-a",
+            "receiptStatus": "settled"
+          }
+        },
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-discharge-ok",
+          "envelopeType": "DischargeEnvelope",
+          "stepId": "close-1",
+          "observedSequence": 2,
+          "fields": {
+            "obligationId": "obligation-a",
+            "paymentRequirementHash": "sha256:pay-req-a"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "FC-OK-003",
+      "label": "valid_compute_reuse_discharge",
+      "expectedStatus": "ACCEPTED",
+      "ordinaryRails": ["cache_fingerprint_match", "compute_receipt_observed"],
+      "currentRootfieldHead": "sha256:head-3",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-compute-ok",
+        "rootfieldId": "compute:request-9",
+        "declaredRootfieldHead": "sha256:head-3",
+        "steps": [
+          { "stepId": "reuse-1", "type": "compute_reuse" }
+        ],
+        "finalClaims": ["compute_reused"]
+      },
+      "envelopes": [
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-compute-ok",
+          "envelopeType": "ComputeReuseEnvelope",
+          "stepId": "reuse-1",
+          "observedSequence": 1,
+          "fields": {
+            "fingerprintMatch": true,
+            "sourceFmmState": "FMM_CONFORMING",
+            "modelCommitment": "sha256:model-a",
+            "inputCommitment": "sha256:input-a"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "FC-BAD-001",
+      "label": "tests_passed_on_wrong_tree",
+      "expectedStatus": "REJECTED",
+      "ordinaryRails": ["git_diff_present", "test_command_exit_zero"],
+      "currentRootfieldHead": "sha256:head-4",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-coding-wrong-tree",
+        "rootfieldId": "repo:demo/task-2",
+        "declaredRootfieldHead": "sha256:head-4",
+        "steps": [
+          { "stepId": "patch-1", "type": "patch_files" },
+          { "stepId": "test-1", "type": "run_tests" }
+        ],
+        "finalClaims": ["tests_passed"]
+      },
+      "envelopes": [
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-diff-wrong-tree",
+          "envelopeType": "DiffEnvelope",
+          "stepId": "patch-1",
+          "observedSequence": 1,
+          "fields": {
+            "beforeTreeHash": "sha256:tree-before",
+            "afterTreeHash": "sha256:tree-after"
+          }
+        },
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-test-wrong-tree",
+          "envelopeType": "TestRunEnvelope",
+          "stepId": "test-1",
+          "observedSequence": 2,
+          "fields": {
+            "command": "npm test",
+            "exitCode": 0,
+            "treeHash": "sha256:tree-before"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "FC-BAD-002",
+      "label": "x402_payment_wrong_obligation",
+      "expectedStatus": "REJECTED",
+      "ordinaryRails": ["payment_requirement_satisfied", "receipt_observed"],
+      "currentRootfieldHead": "sha256:head-5",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-payment-wrong-obligation",
+        "rootfieldId": "agent-commerce:buyer:seller:task-8",
+        "declaredRootfieldHead": "sha256:head-5",
+        "steps": [
+          { "stepId": "pay-1", "type": "x402_payment" },
+          { "stepId": "close-1", "type": "close_obligation" }
+        ],
+        "finalClaims": ["obligation_closed"]
+      },
+      "envelopes": [
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-payment-wrong-obligation",
+          "envelopeType": "PaymentReceiptEnvelope",
+          "stepId": "pay-1",
+          "observedSequence": 1,
+          "fields": {
+            "paymentRequirementHash": "sha256:pay-req-a",
+            "receiptStatus": "settled"
+          }
+        },
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-discharge-wrong-obligation",
+          "envelopeType": "DischargeEnvelope",
+          "stepId": "close-1",
+          "observedSequence": 2,
+          "fields": {
+            "obligationId": "obligation-b",
+            "paymentRequirementHash": "sha256:pay-req-b"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "FC-BAD-003",
+      "label": "valid_signature_stale_memory_head",
+      "expectedStatus": "REJECTED",
+      "ordinaryRails": ["wallet_signature_valid", "session_key_in_scope"],
+      "currentRootfieldHead": "sha256:head-current",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-stale-head",
+        "rootfieldId": "agent-commerce:buyer:wallet:spend-1",
+        "declaredRootfieldHead": "sha256:head-stale",
+        "steps": [
+          {
+            "stepId": "wallet-1",
+            "type": "session_action",
+            "attemptedAction": "wallet_submission",
+            "axiomPatch": "wallet_submission"
+          }
+        ],
+        "finalClaims": ["wallet_action_submitted"]
+      },
+      "envelopes": []
+    },
+    {
+      "caseId": "FC-BAD-004",
+      "label": "compute_cache_match_memory_inconsistent",
+      "expectedStatus": "REJECTED",
+      "ordinaryRails": ["cache_fingerprint_match", "compute_receipt_observed"],
+      "currentRootfieldHead": "sha256:head-6",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-compute-bad-memory",
+        "rootfieldId": "compute:request-10",
+        "declaredRootfieldHead": "sha256:head-6",
+        "steps": [
+          { "stepId": "reuse-1", "type": "compute_reuse" }
+        ],
+        "finalClaims": ["compute_reused"]
+      },
+      "envelopes": [
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-compute-bad-memory",
+          "envelopeType": "ComputeReuseEnvelope",
+          "stepId": "reuse-1",
+          "observedSequence": 1,
+          "fields": {
+            "fingerprintMatch": true,
+            "sourceFmmState": "FMM_INCONSISTENT",
+            "modelCommitment": "sha256:model-a",
+            "inputCommitment": "sha256:input-a"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "FC-BAD-005",
+      "label": "swap_receipt_without_flowpulse",
+      "expectedStatus": "REJECTED",
+      "ordinaryRails": ["transaction_receipt_observed", "swap_succeeded"],
+      "currentRootfieldHead": "sha256:head-7",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-swap-no-flowpulse",
+        "rootfieldId": "uniswap:base-sepolia:pool-1:hook-1",
+        "declaredRootfieldHead": "sha256:head-7",
+        "steps": [
+          { "stepId": "swap-1", "type": "uniswap_swap" }
+        ],
+        "finalClaims": ["swap_observed"]
+      },
+      "envelopes": [
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-tx-only",
+          "envelopeType": "TransactionReceiptEnvelope",
+          "stepId": "swap-1",
+          "observedSequence": 1,
+          "fields": {
+            "txHash": "0xabc",
+            "status": "success"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "FC-BAD-006",
+      "label": "session_key_scope_ignores_axiom_downgrade",
+      "expectedStatus": "REJECTED",
+      "ordinaryRails": ["wallet_signature_valid", "session_key_in_scope"],
+      "currentRootfieldHead": "sha256:head-8",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-axiom-downgrade",
+        "rootfieldId": "agent-commerce:buyer:wallet:spend-2",
+        "declaredRootfieldHead": "sha256:head-8",
+        "steps": [
+          {
+            "stepId": "wallet-1",
+            "type": "session_action",
+            "attemptedAction": "wallet_submission",
+            "axiomPatch": "propose_unsigned_action"
+          }
+        ],
+        "finalClaims": ["wallet_action_submitted"]
+      },
+      "envelopes": []
+    },
+    {
+      "caseId": "FC-BAD-007",
+      "label": "final_claim_verified_without_envelope",
+      "expectedStatus": "REJECTED",
+      "ordinaryRails": ["agent_final_answer_contains_verified"],
+      "currentRootfieldHead": "sha256:head-9",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-verified-no-envelope",
+        "rootfieldId": "agent-commerce:buyer:seller:task-9",
+        "declaredRootfieldHead": "sha256:head-9",
+        "steps": [
+          { "stepId": "answer-1", "type": "final_answer" }
+        ],
+        "finalClaims": ["verified"]
+      },
+      "envelopes": [
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-claim-only",
+          "envelopeType": "ClaimEnvelope",
+          "stepId": "answer-1",
+          "observedSequence": 1,
+          "fields": {
+            "claim": "verified"
+          }
+        }
+      ]
+    }
+  ]
+}
