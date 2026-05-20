@@ -70,6 +70,9 @@ Required phases:
 - `action_executed`
 - `flowbond_settled`
 - `private_proof_ready`
+- `runtime_finalized`
+
+The runtime rejects invalid state transitions and duplicate idempotency keys.
 
 ### EvidenceSchema
 

@@ -13,6 +13,17 @@ from .bond_ledger import BondAccount, LocalBondLedger
 from .policycards import policy_hash
 from .private_compute import PrivateMemoryProgram, run_private_memory_program
 from .pulsepass import build_pulsepass
+from .runtime_state_machine import (
+    ACTION_EXECUTED,
+    BOND_LOCKED,
+    FLOWBOND_SETTLED,
+    MANIFEST_LOADED,
+    POLICY_QUOTED,
+    PRIVATE_PROOF_READY,
+    USER_PAID_FROM_BOND,
+    WARRANTY_RELEASED,
+    RuntimeStateMachine,
+)
 
 
 @dataclass(frozen=True)
@@ -20,6 +31,9 @@ class RuntimeEvent:
     phase: str
     status: str
     event_hash: str
+    from_state: str
+    to_state: str
+    idempotency_key: str
     fields: dict[str, Any]
 
 
@@ -32,20 +46,34 @@ class WarrantedAgentRuntime:
 
     def run(self, request: WorkRequest, *, mode: str) -> dict[str, Any]:
         timeline: list[RuntimeEvent] = []
+        state_machine = RuntimeStateMachine()
+        run_id = "run:" + _hash_dict({"requestId": request.request_id, "mode": mode}).split(":", 1)[1][:16]
         manifest = self.adapter.manifest()
-        timeline.append(_event("manifest_loaded", "OK", {"agentId": manifest.agent_id}))
+        timeline.append(
+            _transition(
+                state_machine,
+                MANIFEST_LOADED,
+                phase="manifest_loaded",
+                status="OK",
+                fields={"agentId": manifest.agent_id},
+                run_id=run_id,
+            )
+        )
 
         policy, proposal = self.adapter.quote(request)
         timeline.append(
-            _event(
-                "policy_quoted",
-                "OK",
-                {
+            _transition(
+                state_machine,
+                POLICY_QUOTED,
+                phase="policy_quoted",
+                status="OK",
+                fields={
                     "requestId": request.request_id,
                     "policyHash": policy_hash(policy),
                     "proposalHash": proposal.proposal_hash,
                     "bondUnits": proposal.bond_units,
                 },
+                run_id=run_id,
             )
         )
 
@@ -61,32 +89,47 @@ class WarrantedAgentRuntime:
             user_id=request.user_id,
             bond_units=proposal.bond_units,
         )
-        timeline.append(_event("bond_locked", "OK", {"bondId": lock["bondId"], "receiptId": lock["receiptId"]}))
+        timeline.append(
+            _transition(
+                state_machine,
+                BOND_LOCKED,
+                phase="bond_locked",
+                status="OK",
+                fields={"bondId": lock["bondId"], "receiptId": lock["receiptId"]},
+                run_id=run_id,
+            )
+        )
 
         outcome = self.adapter.execute(policy, mode=mode)
         timeline.append(
-            _event(
-                "action_executed",
-                "OK",
-                {
+            _transition(
+                state_machine,
+                ACTION_EXECUTED,
+                phase="action_executed",
+                status="OK",
+                fields={
                     "actionId": outcome.action_id,
                     "evidenceTypes": [item.envelope_type for item in outcome.evidence],
                     "spentUnits": outcome.spent_units,
                 },
+                run_id=run_id,
             )
         )
 
         settlement = self.adapter.settle(policy, outcome)
         settlement_receipt = ledger.settle_bond(bond_id=lock["bondId"], settlement=settlement)
         timeline.append(
-            _event(
-                "flowbond_settled",
-                "PASSED" if settlement["passed"] else "FAILED",
-                {
+            _transition(
+                state_machine,
+                FLOWBOND_SETTLED,
+                phase="flowbond_settled",
+                status="PASSED" if settlement["passed"] else "FAILED",
+                fields={
                     "settlement": settlement["settlement"],
                     "pulseId": settlement["flowPulse"]["pulseId"],
                     "ledgerReceiptId": settlement_receipt["receiptId"],
                 },
+                run_id=run_id,
             )
         )
 
@@ -101,24 +144,40 @@ class WarrantedAgentRuntime:
             ),
         )
         timeline.append(
-            _event(
-                "private_proof_ready",
-                "OK" if private_result["passed"] else "FAILED",
-                {
+            _transition(
+                state_machine,
+                PRIVATE_PROOF_READY,
+                phase="private_proof_ready",
+                status="OK" if private_result["passed"] else "FAILED",
+                fields={
                     "vaultCommitment": passport["vaultCommitment"],
                     "transcriptHash": private_result["transcriptHash"],
                 },
+                run_id=run_id,
+            )
+        )
+        final_status = WARRANTY_RELEASED if settlement["passed"] else USER_PAID_FROM_BOND
+        timeline.append(
+            _transition(
+                state_machine,
+                final_status,
+                phase="runtime_finalized",
+                status=final_status,
+                fields={"finalStatus": final_status, "settlement": settlement["settlement"]},
+                run_id=run_id,
             )
         )
 
         return {
             "schema": "flowmemory.warranted_agent_runtime.v0",
+            "runId": run_id,
             "mode": mode,
             "agentId": manifest.agent_id,
             "requestId": request.request_id,
             "policyHash": policy_hash(policy),
             "proposalHash": proposal.proposal_hash,
             "timeline": [event_to_public(event) for event in timeline],
+            "stateMachine": state_machine.snapshot(),
             "settlement": settlement,
             "ledger": ledger.snapshot(),
             "pulsePass": {
@@ -127,7 +186,7 @@ class WarrantedAgentRuntime:
                 "receiptCount": passport["receiptCount"],
             },
             "privateCompute": private_result,
-            "finalStatus": "WARRANTY_RELEASED" if settlement["passed"] else "USER_PAID_FROM_BOND",
+            "finalStatus": final_status,
             "notClaims": [
                 "not_agent_host",
                 "not_wallet_runtime",
@@ -166,13 +225,38 @@ def event_to_public(event: RuntimeEvent) -> dict[str, Any]:
         "phase": event.phase,
         "status": event.status,
         "eventHash": event.event_hash,
+        "fromState": event.from_state,
+        "toState": event.to_state,
+        "idempotencyKey": event.idempotency_key,
         "fields": event.fields,
     }
 
 
-def _event(phase: str, status: str, fields: dict[str, Any]) -> RuntimeEvent:
-    payload = {"phase": phase, "status": status, "fields": fields}
-    return RuntimeEvent(phase=phase, status=status, event_hash=_hash_dict(payload), fields=fields)
+def _transition(
+    state_machine: RuntimeStateMachine,
+    to_state: str,
+    *,
+    phase: str,
+    status: str,
+    fields: dict[str, Any],
+    run_id: str,
+) -> RuntimeEvent:
+    transition = state_machine.transition(
+        to_state,
+        phase=phase,
+        status=status,
+        idempotency_key=f"{run_id}:{phase}",
+        fields=fields,
+    )
+    return RuntimeEvent(
+        phase=phase,
+        status=status,
+        event_hash=transition.transition_hash,
+        from_state=transition.from_state,
+        to_state=transition.to_state,
+        idempotency_key=transition.idempotency_key,
+        fields=fields,
+    )
 
 
 def _hash_dict(payload: dict[str, Any]) -> str:

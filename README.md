@@ -265,6 +265,7 @@ Start here for review:
 - `docs/ARCHITECTURE_DIAGRAMS.md`
 - `docs/THREAT_MODEL.md`
 - `docs/AGENT_RUNTIME.md`
+- `docs/RUNTIME_STATE_MACHINE.md`
 - `docs/AGENT_REGISTRY.md`
 - `docs/EVIDENCE_SCHEMA.md`
 - `docs/LAUNCH_CHECKLIST.md`

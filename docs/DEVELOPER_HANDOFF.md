@@ -109,6 +109,7 @@ Docs:
 
 - `docs/AGENT_FRAMEWORK_ARCHITECTURE.md`
 - `docs/AGENT_RUNTIME.md`
+- `docs/RUNTIME_STATE_MACHINE.md`
 - `docs/AGENT_REGISTRY.md`
 - `docs/EVIDENCE_SCHEMA.md`
 - `docs/CLAIM_GATE.md`

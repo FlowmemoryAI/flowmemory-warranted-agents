@@ -18,6 +18,7 @@ from flowmemory_compiler.policycards import demo_policy_card, policy_hash, publi
 from flowmemory_compiler.private_compute import run_private_compute_demo
 from flowmemory_compiler.pulsepass import ScopedProofRequest, build_pulsepass, demo_passport, scoped_proof
 from flowmemory_compiler.release_transcript import build_release_transcript
+from flowmemory_compiler.runtime_state_machine import ACTION_EXECUTED, MANIFEST_LOADED, RuntimeStateMachine
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -240,10 +241,40 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(result["schema"], "flowmemory.warranted_agent_runtime_demo.v0")
         self.assertEqual(result["summary"]["successFinalStatus"], "WARRANTY_RELEASED")
         self.assertEqual(result["summary"]["failureFinalStatus"], "USER_PAID_FROM_BOND")
-        self.assertEqual(result["summary"]["timelineLength"], 6)
+        self.assertEqual(result["summary"]["timelineLength"], 7)
         self.assertEqual(result["runs"][0]["settlement"]["settlement"], "RELEASE_BOND_TO_AGENT")
         self.assertEqual(result["runs"][1]["settlement"]["settlement"], "PAY_BOND_TO_USER")
         self.assertTrue(all(event["eventHash"].startswith("sha256:") for event in result["runs"][0]["timeline"]))
+        self.assertTrue(result["runs"][0]["stateMachine"]["terminal"])
+
+    def test_runtime_state_machine_rejects_invalid_transition(self):
+        machine = RuntimeStateMachine()
+        with self.assertRaises(ValueError):
+            machine.transition(
+                ACTION_EXECUTED,
+                phase="action_executed",
+                status="OK",
+                idempotency_key="run:test:bad",
+                fields={},
+            )
+
+    def test_runtime_state_machine_rejects_replay_key(self):
+        machine = RuntimeStateMachine()
+        machine.transition(
+            MANIFEST_LOADED,
+            phase="manifest_loaded",
+            status="OK",
+            idempotency_key="run:test:manifest",
+            fields={},
+        )
+        with self.assertRaises(ValueError):
+            machine.transition(
+                ACTION_EXECUTED,
+                phase="action_executed",
+                status="OK",
+                idempotency_key="run:test:manifest",
+                fields={},
+            )
 
     def test_claim_gate_passes_public_copy(self):
         result = scan_claims(ROOT)

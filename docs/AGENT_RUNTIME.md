@@ -25,9 +25,10 @@ bond_locked
 action_executed
 flowbond_settled
 private_proof_ready
+runtime_finalized
 ```
 
-Each phase has an event hash. The point is not to host the agent. The point is to make the action history inspectable, reproducible, and rejectable.
+Each phase has an event hash, state transition, and idempotency key. The point is not to host the agent. The point is to make the action history inspectable, reproducible, and rejectable.
 
 ## Why This Is Different
 
@@ -53,6 +54,7 @@ Run: success -> WARRANTY_RELEASED
   action_executed
   flowbond_settled
   private_proof_ready
+  runtime_finalized
 
 Run: payment_without_delivery -> USER_PAID_FROM_BOND
   manifest_loaded
@@ -61,6 +63,7 @@ Run: payment_without_delivery -> USER_PAID_FROM_BOND
   action_executed
   flowbond_settled
   private_proof_ready
+  runtime_finalized
 ```
 
 ## Boundary
