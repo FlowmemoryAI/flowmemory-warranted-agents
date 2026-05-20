@@ -19,6 +19,7 @@ from .claim_gate import scan_claims
 from .compiler import compile_plan, compile_trace
 from .evidence_schema import evidence_schema_report
 from .flowbond import demo_cases as flowbond_demo_cases
+from .launch_packet import build_launch_packet
 from .policycards import demo_policy_card, public_policy_view
 from .private_compute import run_private_compute_demo
 from .pulsepass import demo_passport, demo_proofs
@@ -104,6 +105,10 @@ def main(argv: list[str] | None = None) -> int:
     claim_gate = sub.add_parser("claim-gate", help="Scan public copy for unguarded overclaims.")
     claim_gate.add_argument("--pretty", action="store_true")
     claim_gate.add_argument("--json", action="store_true")
+
+    launch_packet = sub.add_parser("launch-packet", help="Print public launch readiness packet.")
+    launch_packet.add_argument("--pretty", action="store_true")
+    launch_packet.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -257,6 +262,15 @@ def main(argv: list[str] | None = None) -> int:
         else:
             _print_claim_gate(result)
         return 0 if result["passed"] else 1
+
+    if args.command == "launch-packet":
+        cases = _load_cases(DEFAULT_CASES)
+        result = build_launch_packet(cases, ROOT)
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            _print_launch_packet(result)
+        return 0 if result["readiness"]["passed"] else 1
 
     return 2
 
@@ -597,6 +611,24 @@ def _print_claim_gate(result: dict[str, Any]) -> None:
         print("Unguarded claims:")
         for item in result["unguardedOverclaims"]:
             print(f"  {item['file']}:{item['line']} [{item['phrase']}] {item['text']}")
+
+
+def _print_launch_packet(result: dict[str, Any]) -> None:
+    print("FlowMemory Warranted Agents Launch Packet")
+    print()
+    print(f"version:                {result['version']}")
+    print(f"releaseTranscriptHash:  {result['releaseTranscriptHash']}")
+    print(f"packetHash:             {result['packetHash']}")
+    print(f"readiness:              {'PASSED' if result['readiness']['passed'] else 'FAILED'}")
+    print()
+    print("Checks:")
+    for check in result["readiness"]["checks"]:
+        status = "PASS" if check["passed"] else "FAIL"
+        print(f"  {check['check']:<55} {status} {check['detail']}")
+    print()
+    print("Commands:")
+    for command in result["commands"]:
+        print(f"  {command}")
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:

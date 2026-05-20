@@ -156,6 +156,7 @@ python -m flowmemory_compiler.cli agent-runtime-demo --pretty
 python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
 python -m flowmemory_compiler.cli claim-gate --pretty
+python -m flowmemory_compiler.cli launch-packet --pretty
 ```
 
 Expected shape:
@@ -198,6 +199,9 @@ PrivateCompute:
 
 ReleaseTranscript:
   one canonical offline object that summarizes the full framework
+
+LaunchPacket:
+  one readiness object for public review
 ```
 
 Run the conformance engine:
@@ -278,6 +282,7 @@ Start here for review:
 - `docs/AGENT_REGISTRY.md`
 - `docs/EVIDENCE_SCHEMA.md`
 - `docs/LAUNCH_CHECKLIST.md`
+- `docs/LAUNCH_PACKET.md`
 - `specs/WarrantedAgentFramework.v0.md`
 - `specs/RuntimeStateMachine.v0.md`
 - `specs/EvidenceSchemas.v0.md`

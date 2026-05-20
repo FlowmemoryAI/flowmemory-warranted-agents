@@ -15,6 +15,7 @@ from flowmemory_compiler.claim_gate import scan_claims
 from flowmemory_compiler.compiler import compile_trace
 from flowmemory_compiler.evidence_schema import evidence_schema_report, validate_evidence_envelope
 from flowmemory_compiler.flowbond import AgentWorkOutcome, EvidenceEnvelope, demo_cases as flowbond_demo_cases, settle_warranted_action
+from flowmemory_compiler.launch_packet import build_launch_packet
 from flowmemory_compiler.policycards import demo_policy_card, policy_hash, public_policy_view
 from flowmemory_compiler.private_compute import run_private_compute_demo
 from flowmemory_compiler.pulsepass import ScopedProofRequest, build_pulsepass, demo_passport, scoped_proof
@@ -209,6 +210,13 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(result["flowCompiler"]["validAccepted"], 3)
         self.assertEqual(result["flowCompiler"]["invalidRejected"], 8)
         self.assertEqual(result["flowCompiler"]["escapedImpossibleHistories"], 0)
+
+    def test_launch_packet_passes_readiness(self):
+        result = build_launch_packet(CASES, ROOT)
+        self.assertEqual(result["schema"], "flowmemory.warranted_agents_launch_packet.v0")
+        self.assertTrue(result["readiness"]["passed"])
+        self.assertTrue(result["packetHash"].startswith("sha256:"))
+        self.assertEqual(result["version"], "0.2.0")
 
     def test_agent_adapter_boundary_quotes_and_executes(self):
         adapter = DemoWarrantedAgentAdapter()
