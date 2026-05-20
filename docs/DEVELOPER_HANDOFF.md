@@ -105,6 +105,7 @@ Code:
 - `flowmemory_compiler/pulsepass.py`
 - `flowmemory_compiler/private_compute.py`
 - `flowmemory_compiler/claim_gate.py`
+- `flowmemory_compiler/production_readiness.py`
 
 Docs:
 
@@ -116,6 +117,11 @@ Docs:
 - `docs/EVIDENCE_SCHEMA.md`
 - `docs/CLAIM_GATE.md`
 - `docs/RELEASE_TRANSCRIPT.md`
+- `docs/PRODUCTION_READINESS_ARCHITECTURE.md`
+- `docs/PRODUCTION_GATE_CHECKLIST.md`
+- `docs/OPERATOR_RUNBOOK.md`
+- `docs/INCIDENT_RESPONSE.md`
+- `docs/SIGNER_CUSTODY_BOUNDARIES.md`
 
 Spec:
 
@@ -130,6 +136,7 @@ python -m flowmemory_compiler.cli agent-runtime-demo --pretty
 python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
 python -m flowmemory_compiler.cli claim-gate --pretty
+python -m flowmemory_compiler.cli production-readiness --pretty
 ```
 
 ## Strong Claim
@@ -146,4 +153,10 @@ The point is narrower:
 
 ```text
 Make the agent promise machine-checkable before, during, and after execution.
+```
+
+Production status:
+
+```text
+Local architecture ready; production gates block live deployment until external adapters, payment rails, durable evidence, observability, incident response, and security review are complete.
 ```

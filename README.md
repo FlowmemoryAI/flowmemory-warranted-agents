@@ -157,6 +157,7 @@ python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
 python -m flowmemory_compiler.cli claim-gate --pretty
 python -m flowmemory_compiler.cli launch-packet --pretty
+python -m flowmemory_compiler.cli production-readiness --pretty
 ```
 
 Expected shape:
@@ -202,6 +203,9 @@ ReleaseTranscript:
 
 LaunchPacket:
   one readiness object for public review
+
+ProductionReadiness:
+  local architecture readiness plus explicit external production blockers
 ```
 
 Run the conformance engine:
@@ -283,9 +287,16 @@ Start here for review:
 - `docs/EVIDENCE_SCHEMA.md`
 - `docs/LAUNCH_CHECKLIST.md`
 - `docs/LAUNCH_PACKET.md`
+- `docs/PRODUCTION_READINESS_ARCHITECTURE.md`
+- `docs/PRODUCTION_GATE_CHECKLIST.md`
+- `docs/OPERATOR_RUNBOOK.md`
+- `docs/INCIDENT_RESPONSE.md`
+- `docs/SIGNER_CUSTODY_BOUNDARIES.md`
+- `docs/SLO_OBSERVABILITY.md`
 - `specs/WarrantedAgentFramework.v0.md`
 - `specs/RuntimeStateMachine.v0.md`
 - `specs/EvidenceSchemas.v0.md`
+- `specs/RuntimeTelemetry.v0.md`
 - `examples/warranted_agents/README.md`
 
 ## Non-Claims

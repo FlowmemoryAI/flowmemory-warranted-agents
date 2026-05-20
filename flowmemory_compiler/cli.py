@@ -22,6 +22,7 @@ from .flowbond import demo_cases as flowbond_demo_cases
 from .launch_packet import build_launch_packet
 from .policycards import demo_policy_card, public_policy_view
 from .private_compute import run_private_compute_demo
+from .production_readiness import build_production_readiness_packet
 from .pulsepass import demo_passport, demo_proofs
 from .release_transcript import build_release_transcript
 
@@ -109,6 +110,12 @@ def main(argv: list[str] | None = None) -> int:
     launch_packet = sub.add_parser("launch-packet", help="Print public launch readiness packet.")
     launch_packet.add_argument("--pretty", action="store_true")
     launch_packet.add_argument("--json", action="store_true")
+
+    production_readiness = sub.add_parser("production-readiness", help="Print production-readiness gate packet.")
+    production_readiness.add_argument("--pretty", action="store_true")
+    production_readiness.add_argument("--json", action="store_true")
+    production_readiness.add_argument("--satisfied-gate", action="append", default=[])
+    production_readiness.add_argument("--require-production-ready", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -271,6 +278,17 @@ def main(argv: list[str] | None = None) -> int:
         else:
             _print_launch_packet(result)
         return 0 if result["readiness"]["passed"] else 1
+
+    if args.command == "production-readiness":
+        cases = _load_cases(DEFAULT_CASES)
+        result = build_production_readiness_packet(cases, ROOT, satisfied_gates=set(args.satisfied_gate))
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            _print_production_readiness(result)
+        if args.require_production_ready:
+            return 0 if result["productionReady"] else 1
+        return 0 if result["localArchitectureReady"] else 1
 
     return 2
 
@@ -629,6 +647,26 @@ def _print_launch_packet(result: dict[str, Any]) -> None:
     print("Commands:")
     for command in result["commands"]:
         print(f"  {command}")
+
+
+def _print_production_readiness(result: dict[str, Any]) -> None:
+    print("FlowMemory Warranted Agents Production Readiness")
+    print()
+    print(f"localArchitectureReady: {result['localArchitectureReady']}")
+    print(f"productionReady:        {result['productionReady']}")
+    print(f"releaseMode:            {result['releaseMode']}")
+    print(f"blockingGateCount:      {result['blockingGateCount']}")
+    print(f"packetHash:             {result['packetHash']}")
+    print()
+    print("Production gates:")
+    for gate in result["productionGates"]:
+        status = "PASS" if gate["passed"] else "BLOCK"
+        print(f"  {gate['gate']:<40} {status}")
+        if not gate["passed"]:
+            print(f"    {gate['why']}")
+    print()
+    print("Next milestone:")
+    print(f"  {result['nextRequiredMilestone']}")
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:

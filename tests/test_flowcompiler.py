@@ -18,6 +18,7 @@ from flowmemory_compiler.flowbond import AgentWorkOutcome, EvidenceEnvelope, dem
 from flowmemory_compiler.launch_packet import build_launch_packet
 from flowmemory_compiler.policycards import demo_policy_card, policy_hash, public_policy_view
 from flowmemory_compiler.private_compute import run_private_compute_demo
+from flowmemory_compiler.production_readiness import PRODUCTION_GATES, build_production_readiness_packet
 from flowmemory_compiler.pulsepass import ScopedProofRequest, build_pulsepass, demo_passport, scoped_proof
 from flowmemory_compiler.release_transcript import build_release_transcript
 from flowmemory_compiler.runtime_state_machine import ACTION_EXECUTED, MANIFEST_LOADED, RuntimeStateMachine
@@ -217,6 +218,21 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertTrue(result["readiness"]["passed"])
         self.assertTrue(result["packetHash"].startswith("sha256:"))
         self.assertEqual(result["version"], "0.2.1")
+
+    def test_production_readiness_packet_marks_external_gates_blocking(self):
+        result = build_production_readiness_packet(CASES, ROOT)
+        self.assertEqual(result["schema"], "flowmemory.production_readiness_packet.v0")
+        self.assertTrue(result["localArchitectureReady"])
+        self.assertFalse(result["productionReady"])
+        self.assertEqual(result["blockingGateCount"], len(PRODUCTION_GATES))
+        self.assertEqual(result["releaseMode"], "LOCAL_ARCHITECTURE_READY_ONLY")
+
+    def test_production_readiness_can_pass_when_all_external_gates_are_satisfied(self):
+        all_gates = {gate["gate"] for gate in PRODUCTION_GATES}
+        result = build_production_readiness_packet(CASES, ROOT, satisfied_gates=all_gates)
+        self.assertTrue(result["productionReady"])
+        self.assertEqual(result["blockingGateCount"], 0)
+        self.assertEqual(result["releaseMode"], "PRODUCTION_READY")
 
     def test_agent_adapter_boundary_quotes_and_executes(self):
         adapter = DemoWarrantedAgentAdapter()

@@ -32,10 +32,13 @@ GUARD_WORDS = (
     "no ",
     "does not",
     "do not",
+    "must not",
     "without",
     "non-claim",
     "non-claims",
     "not_",
+    "boundary",
+    "boundaries",
 )
 
 GUARD_SECTION_MARKERS = (
@@ -46,6 +49,8 @@ GUARD_SECTION_MARKERS = (
     "not safe to claim",
     "what not to claim",
     "overclaims to avoid",
+    "the framework must not sign",
+    "must not sign",
 )
 
 
@@ -64,7 +69,7 @@ def scan_claims(root: Path) -> dict[str, Any]:
         relative = str(path.relative_to(root)).replace("\\", "/")
         in_guarded_section = False
         for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-            lower = line.lower()
+            lower = _strip_inline_code(line).lower()
             stripped = lower.strip()
             if stripped.startswith("#") and not _is_guard_section_marker(lower):
                 in_guarded_section = False
@@ -109,3 +114,8 @@ def _is_guarded(line: str) -> bool:
 
 def _is_guard_section_marker(line: str) -> bool:
     return any(marker in line for marker in GUARD_SECTION_MARKERS)
+
+
+def _strip_inline_code(line: str) -> str:
+    parts = line.split("`")
+    return "".join(part for index, part in enumerate(parts) if index % 2 == 0)
