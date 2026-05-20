@@ -3,6 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 
+from flowmemory_compiler.agent_framework import run_agent_framework_demo
 from flowmemory_compiler.capture import capture_command
 from flowmemory_compiler.checker import check_trace
 from flowmemory_compiler.compiler import compile_trace
@@ -129,6 +130,18 @@ class FlowCompilerTest(unittest.TestCase):
         proof = scoped_proof(passport, ScopedProofRequest("has_three_completed_warranted_actions", threshold=3))
         self.assertFalse(proof["passed"])
         self.assertEqual(proof["countBucket"], "1")
+
+    def test_agent_framework_runs_end_to_end(self):
+        result = run_agent_framework_demo()
+        self.assertEqual(result["schema"], "flowmemory.agent_framework_demo.v0")
+        self.assertTrue(result["agentManifest"]["manifestHash"].startswith("sha256:"))
+        self.assertTrue(result["policyCard"]["policyHash"].startswith("sha256:"))
+        self.assertEqual(len(result["settlements"]), 2)
+        self.assertTrue(result["settlements"][0]["passed"])
+        self.assertFalse(result["settlements"][1]["passed"])
+        self.assertEqual(result["pulsePass"]["receiptCount"], 2)
+        self.assertEqual(len(result["scopedProofs"]), 2)
+        self.assertTrue(all(proof["proofHash"].startswith("sha256:") for proof in result["scopedProofs"]))
 
 
 def _case(case_id):

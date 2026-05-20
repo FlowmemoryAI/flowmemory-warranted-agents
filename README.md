@@ -5,7 +5,7 @@ Generic agents make claims. FlowMemory agents can leave warranted receipts.
 FlowMemory Warranted Agents is a local public proof for a new agent primitive:
 
 ```text
-PolicyCard -> FlowBond -> FlowPulse -> PulsePass -> Scoped Proof
+AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> FlowBond -> FlowPulse -> PulsePass -> ScopedProof
 ```
 
 The user defines the promise. The agent bonds the promise. The action emits receipt-backed memory. The user privately carries proof of what happened.
@@ -41,6 +41,24 @@ PulsePass gives the user portable private proof.
 PolicyCards let the user's rules travel between agents.
 
 ## Product Stack
+
+### AgentManifest
+
+An agent declares what it can warrant:
+
+- capabilities;
+- supported evidence;
+- maximum bond;
+- privacy modes;
+- settlement modes.
+
+This is not a normal profile or reputation score. It is a machine-readable warranty surface.
+
+### WorkRequest
+
+The user declares what outcome they want and what evidence must close the obligation.
+
+The request can be shared as a hashable public view while keeping private user and obligation fields hidden.
 
 ### PolicyCard
 
@@ -96,6 +114,7 @@ FlowCompiler is the conformance engine underneath the stack. It turns proposed a
 Run the warranted-agent stack:
 
 ```powershell
+python -m flowmemory_compiler.cli agent-framework-demo --pretty
 python -m flowmemory_compiler.cli policycard-demo --pretty
 python -m flowmemory_compiler.cli flowbond-demo --pretty
 python -m flowmemory_compiler.cli pulsepass-demo --pretty
@@ -104,6 +123,9 @@ python -m flowmemory_compiler.cli pulsepass-demo --pretty
 Expected shape:
 
 ```text
+AgentFramework:
+  manifest, request, policy, proposal, settlement, PulsePass, scoped proofs
+
 PolicyCard:
   portable, hashable, bondable promise
 

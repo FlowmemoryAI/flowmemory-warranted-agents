@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .agent_framework import run_agent_framework_demo
 from .capture import capture_command
 from .checker import check_trace
 from .compiler import compile_plan, compile_trace
@@ -54,6 +55,10 @@ def main(argv: list[str] | None = None) -> int:
     pulsepass = sub.add_parser("pulsepass-demo", help="Run the PulsePass scoped-proof demo.")
     pulsepass.add_argument("--pretty", action="store_true")
     pulsepass.add_argument("--json", action="store_true")
+
+    framework = sub.add_parser("agent-framework-demo", help="Run the full warranted-agent framework demo.")
+    framework.add_argument("--pretty", action="store_true")
+    framework.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -125,6 +130,14 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({"passport": passport, "proofs": proofs}, indent=2, sort_keys=True))
         else:
             _print_pulsepass(passport, proofs)
+        return 0
+
+    if args.command == "agent-framework-demo":
+        demo_result = run_agent_framework_demo()
+        if args.json:
+            print(json.dumps(demo_result, indent=2, sort_keys=True))
+        else:
+            _print_agent_framework(demo_result)
         return 0
 
     return 2
@@ -243,6 +256,44 @@ def _print_pulsepass(passport: dict[str, Any], proofs: list[dict[str, Any]]) -> 
     print()
     print("Hidden:")
     print("  raw receipts, raw user id, exact action history, private obligation ids")
+
+
+def _print_agent_framework(result: dict[str, Any]) -> None:
+    print("FlowMemory Warranted Agent Framework")
+    print()
+    print("Stack:")
+    print("  AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> FlowBond -> FlowPulse -> PulsePass -> ScopedProof")
+    print()
+    print("Agent:")
+    print(f"  {result['agentManifest']['display_name']}")
+    print(f"  manifestHash: {result['agentManifest']['manifestHash']}")
+    print()
+    print("Policy:")
+    print(f"  {result['policyCard']['title']}")
+    print(f"  policyHash: {result['policyCard']['policyHash']}")
+    print()
+    print("Proposal:")
+    print(f"  proposalHash: {result['agentProposal']['proposal_hash']}")
+    print(f"  bondUnits:    {result['agentProposal']['bond_units']}")
+    print()
+    print("Settlements:")
+    for settlement in result["settlements"]:
+        status = "PASSED" if settlement["passed"] else "FAILED"
+        print(f"  {settlement['flowPulse']['actionId']:<30} {status} {settlement['settlement']}")
+        if settlement["violations"]:
+            print(f"    violations: {', '.join(settlement['violations'])}")
+    print()
+    print("PulsePass:")
+    print(f"  vaultCommitment: {result['pulsePass']['vaultCommitment']}")
+    print(f"  receiptCount:    {result['pulsePass']['receiptCount']}")
+    print()
+    print("Scoped proofs:")
+    for proof in result["scopedProofs"]:
+        status = "PASS" if proof["passed"] else "FAIL"
+        print(f"  {proof['predicate']:<36} {status} {proof['proofHash']}")
+    print()
+    print("Result:")
+    print("  The agent framework turns promises into warranted receipts and user-owned scoped proof.")
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:
