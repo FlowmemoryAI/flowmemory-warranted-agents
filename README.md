@@ -1,16 +1,122 @@
-# FlowMemory Compiler
+# FlowMemory Warranted Agents
 
-FlowCompiler is the history compiler for autonomous agents: it turns proposed actions into required evidence envelopes and rejects futures that cannot become legal machine histories.
+Generic agents make claims. FlowMemory agents can leave warranted receipts.
 
-A valid action surface is not a valid machine history.
-
-This local v0 package is not a wallet, payment rail, tracing system, RAG memory store, workflow engine, or production verifier. It is a deterministic conformance proof for a narrower claim:
+FlowMemory Warranted Agents is a local public proof for a new agent primitive:
 
 ```text
-Actions can look valid to ordinary rails while the machine history behind them is impossible.
+PolicyCard -> FlowBond -> FlowPulse -> PulsePass -> Scoped Proof
 ```
 
-## What It Proves
+The user defines the promise. The agent bonds the promise. The action emits receipt-backed memory. The user privately carries proof of what happened.
+
+This is not a generic agent marketplace, RAG memory layer, wallet, x402 replacement, tracing stack, or production verifier.
+
+It is a buildable proof for a narrower and more marketable claim:
+
+```text
+Specific agent promises can become portable warranties backed by FlowPulse memory.
+```
+
+## Why This Exists
+
+Most AI-agent infrastructure answers local questions:
+
+- can the wallet sign;
+- did the payment settle;
+- did the tool call run;
+- did the transaction land;
+- did a log exist.
+
+FlowMemory asks the product question users actually understand:
+
+```text
+If the agent breaks the promise, what pays me back?
+```
+
+FlowBond gives the agent money on the line.
+
+PulsePass gives the user portable private proof.
+
+PolicyCards let the user's rules travel between agents.
+
+## Product Stack
+
+### PolicyCard
+
+A portable user rule that an agent can bond against.
+
+Example:
+
+```text
+Deliver the requested research artifact.
+Required evidence:
+  PaymentReceiptEnvelope
+  WorkDeliveryEnvelope
+  AcceptanceEnvelope
+  FlowPulseReceiptEnvelope
+Bond:
+  25.00 units
+```
+
+### FlowBond
+
+A bond posted against the PolicyCard.
+
+If the agent closes the obligation with the required evidence, the bond releases back to the agent.
+
+If payment happened but delivery, acceptance, or the correct obligation link is missing, the bond pays the user.
+
+### FlowPulse
+
+The receipt-backed memory artifact.
+
+The action itself is not the memory. The receipt trail is the proof envelope. The FlowPulse is the memory artifact.
+
+### PulsePass
+
+The user's private receipt passport.
+
+PulsePass stores receipts and exposes scoped proofs like:
+
+```text
+I completed at least one warranted agent action.
+I have a failed warranty receipt.
+I have FlowPulse memory from this agent.
+```
+
+It does not expose the raw receipt history.
+
+### FlowCompiler
+
+FlowCompiler is the conformance engine underneath the stack. It turns proposed actions into required evidence envelopes and rejects futures that cannot become legal machine histories.
+
+## Demos
+
+Run the warranted-agent stack:
+
+```powershell
+python -m flowmemory_compiler.cli policycard-demo --pretty
+python -m flowmemory_compiler.cli flowbond-demo --pretty
+python -m flowmemory_compiler.cli pulsepass-demo --pretty
+```
+
+Expected shape:
+
+```text
+PolicyCard:
+  portable, hashable, bondable promise
+
+FlowBond:
+  warranted_work_completed     PASSED RELEASE_BOND_TO_AGENT
+  payment_without_delivery     FAILED PAY_BOND_TO_USER
+  orphan_spend                 FAILED PAY_BOND_TO_USER
+
+PulsePass:
+  scoped proofs reveal predicates, not raw history
+```
+
+Run the conformance engine:
 
 FlowCompiler compiles an `AgentPlan` into a `FlowProgram`, then checks a `FutureTrace` against the proof envelopes that the plan requires.
 
@@ -24,8 +130,6 @@ It rejects traces with:
 - Uniswap swap receipts without a FlowPulse receipt envelope;
 - session-key actions that ignore an AxiomPatch downgrade;
 - final verification claims without verification evidence.
-
-## Demo
 
 Compile a plan into derived evidence requirements:
 
@@ -74,44 +178,39 @@ Summary:
 
 ## Non-Claims
 
-FlowCompiler v0 does not claim:
+This v0 does not claim:
 
 - custody;
 - wallet enforcement;
 - x402 replacement;
 - fund protection;
 - code correctness;
-- work quality;
+- work-quality proof;
 - semantic truth;
 - model correctness;
 - GPU acceleration;
 - live Base deployment;
+- full privacy;
+- zero-knowledge privacy;
+- production bond adjudication;
 - production verifier readiness.
 
 The local `capture-command` helper records command exit code and output hashes. It still does not prove code correctness, semantic truth, or production provenance.
 
-## Positioning
-
-Wallets can sign. Payments can settle. Tests can run.
-
-FlowCompiler asks whether the resulting history is admissible under declared evidence envelopes.
-
-FlowBond extends that market thesis:
+## Positioning Lines
 
 ```text
 Generic agents make claims. FlowMemory agents can leave warranted receipts.
 ```
 
-The product stack is:
-
 ```text
-PolicyCard -> FlowBond -> FlowPulse -> PulsePass -> Scoped Proof
+Agents with money on the line.
 ```
 
-Run each demo:
+```text
+The user owns the rule. The agent bonds the promise. The FlowPulse carries the memory.
+```
 
-```powershell
-python -m flowmemory_compiler.cli policycard-demo --pretty
-python -m flowmemory_compiler.cli flowbond-demo --pretty
-python -m flowmemory_compiler.cli pulsepass-demo --pretty
+```text
+Actions can look valid to ordinary rails while the machine history behind them is impossible.
 ```

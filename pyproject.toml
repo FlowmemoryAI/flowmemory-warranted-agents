@@ -1,11 +1,10 @@
 [project]
-name = "flowmemory-compiler"
+name = "flowmemory-warranted-agents"
 version = "0.1.0"
-description = "Local FlowCompiler proof for autonomous-agent history conformance."
+description = "Local FlowMemory proof for warranted agents, PolicyCards, FlowBond, PulsePass, and FlowCompiler conformance."
 requires-python = ">=3.11"
 readme = "README.md"
 license = { text = "MIT" }
 
 [project.scripts]
 flowcompiler = "flowmemory_compiler.cli:main"
-
