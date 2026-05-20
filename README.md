@@ -239,6 +239,17 @@ Summary:
   escaped impossible futures: 0
 ```
 
+## Developer Handoff
+
+Start here for review:
+
+- `docs/DEVELOPER_HANDOFF.md`
+- `docs/AGENT_FRAMEWORK_ARCHITECTURE.md`
+- `docs/AGENT_RUNTIME.md`
+- `docs/AGENT_REGISTRY.md`
+- `docs/LAUNCH_CHECKLIST.md`
+- `specs/WarrantedAgentFramework.v0.md`
+
 ## Non-Claims
 
 This v0 does not claim:

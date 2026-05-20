@@ -43,6 +43,7 @@ GUARD_SECTION_MARKERS = (
     "non-claims:",
     "does not claim",
     "do not claim",
+    "not safe to claim",
     "what not to claim",
     "overclaims to avoid",
 )
