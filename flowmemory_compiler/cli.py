@@ -11,6 +11,8 @@ from .capture import capture_command
 from .checker import check_trace
 from .compiler import compile_plan, compile_trace
 from .flowbond import demo_cases as flowbond_demo_cases
+from .policycards import demo_policy_card, public_policy_view
+from .pulsepass import demo_passport, demo_proofs
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,6 +46,14 @@ def main(argv: list[str] | None = None) -> int:
     flowbond = sub.add_parser("flowbond-demo", help="Run the FlowBond warranted-action R&D demo.")
     flowbond.add_argument("--pretty", action="store_true")
     flowbond.add_argument("--json", action="store_true")
+
+    policycard = sub.add_parser("policycard-demo", help="Show a portable PolicyCard.")
+    policycard.add_argument("--pretty", action="store_true")
+    policycard.add_argument("--json", action="store_true")
+
+    pulsepass = sub.add_parser("pulsepass-demo", help="Run the PulsePass scoped-proof demo.")
+    pulsepass.add_argument("--pretty", action="store_true")
+    pulsepass.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -98,6 +108,23 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(cases, indent=2, sort_keys=True))
         else:
             _print_flowbond_demo(cases)
+        return 0
+
+    if args.command == "policycard-demo":
+        card = public_policy_view(demo_policy_card())
+        if args.json:
+            print(json.dumps(card, indent=2, sort_keys=True))
+        else:
+            _print_policycard(card)
+        return 0
+
+    if args.command == "pulsepass-demo":
+        passport = demo_passport()
+        proofs = demo_proofs()
+        if args.json:
+            print(json.dumps({"passport": passport, "proofs": proofs}, indent=2, sort_keys=True))
+        else:
+            _print_pulsepass(passport, proofs)
         return 0
 
     return 2
@@ -168,7 +195,7 @@ def _print_flowbond_demo(cases: list[dict[str, Any]]) -> None:
     print("FlowBond R&D Demo")
     print()
     print("Thesis:")
-    print("  Generic agents give advice. FlowMemory agents can leave bonded receipts.")
+    print("  Generic agents make claims. FlowMemory agents can leave warranted receipts.")
     print()
     for case in cases:
         result = case["result"]
@@ -180,10 +207,42 @@ def _print_flowbond_demo(cases: list[dict[str, Any]]) -> None:
             print(f"  violations: {', '.join(result['violations'])}")
     print()
     print("Result:")
-    print("  A deterministic policy turns an agent promise into a FlowPulse-settled warranty.")
+    print("  A PolicyCard turns an agent promise into a FlowPulse-settled warranty.")
     print()
     print("Non-claims:")
-    print("  no profit guarantee, no custody, no swap control, no fund protection, no production adjudication.")
+    print("  no profit guarantee, no custody, no fund protection, no work-quality proof, no production adjudication.")
+
+
+def _print_policycard(card: dict[str, Any]) -> None:
+    print("PolicyCard Demo")
+    print()
+    print(f"title:        {card['title']}")
+    print(f"promiseType:  {card['promise_type']}")
+    print(f"agentId:      {card['agent_id']}")
+    print(f"bondUnits:    {card['bond_units']}")
+    print(f"policyHash:   {card['policyHash']}")
+    print("requires:")
+    for item in card["required_evidence"]:
+        print(f"  - {item}")
+    print()
+    print("Result:")
+    print("  The user rule is portable, hashable, and bondable without exposing private fields.")
+
+
+def _print_pulsepass(passport: dict[str, Any], proofs: list[dict[str, Any]]) -> None:
+    print("PulsePass Demo")
+    print()
+    print(f"ownerHash:       {passport['ownerHash']}")
+    print(f"vaultCommitment: {passport['vaultCommitment']}")
+    print(f"receiptCount:    {passport['receiptCount']}")
+    print()
+    print("Scoped proofs:")
+    for proof in proofs:
+        status = "PASS" if proof["passed"] else "FAIL"
+        print(f"  {proof['predicate']:<40} {status} {proof['countBucket']} proof={proof['proofHash']}")
+    print()
+    print("Hidden:")
+    print("  raw receipts, raw user id, exact action history, private obligation ids")
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:

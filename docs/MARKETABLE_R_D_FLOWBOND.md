@@ -16,11 +16,11 @@ receipt-native memory for autonomous money
 
 ### FlowBond
 
-FlowBond turns an agent promise into a bonded, FlowPulse-settled action.
+FlowBond turns an agent promise into a bonded, FlowPulse-settled warranty.
 
-Generic agents give advice.
+Generic agents make claims.
 
-FlowMemory agents leave bonded receipts.
+FlowMemory agents leave warranted receipts.
 
 ## Why This Is More Marketable
 
@@ -43,26 +43,26 @@ That is easier for users to understand than memory conformance.
 
 ## MVP
 
-Build one bonded swap assistant:
+Build one warranted work assistant:
 
 1. User chooses a deterministic policy:
-   - pair;
-   - max spend;
-   - min output;
-   - max slippage;
+   - obligation;
+   - required evidence;
+   - allowed spend;
    - expiry;
    - agent ID.
-2. Agent posts a small bond against the policy.
-3. Swap executes.
-4. A FlowPulse-style receipt records:
+2. The policy becomes a `PolicyCard`.
+3. Agent posts a small bond against the PolicyCard.
+4. The agent acts.
+5. A FlowPulse-style receipt records:
    - policy hash;
    - agent ID;
-   - amount bucket;
-   - slippage bucket;
+   - obligation hash;
+   - evidence types;
    - pass/fail;
    - outcome hash.
-5. If the policy passed, the bond releases to the agent.
-6. If the policy failed, the bond pays the user.
+6. If the obligation is closed, the bond releases to the agent.
+7. If payment happened but delivery/acceptance is missing, the bond pays the user.
 
 ## Local Demo
 
@@ -76,24 +76,25 @@ Expected shape:
 FlowBond R&D Demo
 
 Thesis:
-  Generic agents give advice. FlowMemory agents can leave bonded receipts.
+  Generic agents make claims. FlowMemory agents can leave warranted receipts.
 
-FB-OK-001  bonded_swap_policy_passed       PASSED RELEASE_BOND_TO_AGENT
-FB-BAD-001 bonded_swap_policy_violated     FAILED PAY_BOND_TO_USER
+FB-OK-001  warranted_work_completed        PASSED RELEASE_BOND_TO_AGENT
+FB-BAD-001 payment_without_delivery        FAILED PAY_BOND_TO_USER
+FB-BAD-002 orphan_spend                    FAILED PAY_BOND_TO_USER
 
 Result:
-  A deterministic policy turns an agent promise into a FlowPulse-settled warranty.
+  A PolicyCard turns an agent promise into a FlowPulse-settled warranty.
 ```
 
 ## Incentive Loop
 
-Users prefer bonded agents because automation has recourse.
+Users prefer warranted agents because automation has recourse.
 
-Agents bond actions to win users, charge higher fees, and unlock larger spend limits.
+Agents bond promises to win users, charge higher fees, and unlock larger spend limits.
 
 Developers compete on policies they are willing to warranty.
 
-FlowMemory becomes the memory layer for agent promises.
+FlowMemory becomes the warranty memory layer for agent promises.
 
 ## Privacy And Decentralization
 
@@ -149,3 +150,16 @@ Claim this:
 Specific agent actions can be warrantied, carried, proven, and monetized through FlowPulse memory.
 ```
 
+## Product Stack
+
+FlowBond is the first layer, but it works best as a stack:
+
+```text
+PolicyCard -> FlowBond -> FlowPulse -> PulsePass -> Scoped Proof
+```
+
+- `PolicyCard`: the portable user rule.
+- `FlowBond`: the bond posted against the promise.
+- `FlowPulse`: the memory receipt emitted by the action.
+- `PulsePass`: the user's private receipt passport.
+- `Scoped Proof`: a predicate shared without exposing the full history.

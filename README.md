@@ -99,5 +99,19 @@ FlowCompiler asks whether the resulting history is admissible under declared evi
 FlowBond extends that market thesis:
 
 ```text
-Generic agents give advice. FlowMemory agents can leave bonded receipts.
+Generic agents make claims. FlowMemory agents can leave warranted receipts.
+```
+
+The product stack is:
+
+```text
+PolicyCard -> FlowBond -> FlowPulse -> PulsePass -> Scoped Proof
+```
+
+Run each demo:
+
+```powershell
+python -m flowmemory_compiler.cli policycard-demo --pretty
+python -m flowmemory_compiler.cli flowbond-demo --pretty
+python -m flowmemory_compiler.cli pulsepass-demo --pretty
 ```

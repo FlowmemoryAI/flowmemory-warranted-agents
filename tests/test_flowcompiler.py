@@ -7,6 +7,8 @@ from flowmemory_compiler.capture import capture_command
 from flowmemory_compiler.checker import check_trace
 from flowmemory_compiler.compiler import compile_trace
 from flowmemory_compiler.flowbond import demo_cases as flowbond_demo_cases
+from flowmemory_compiler.policycards import demo_policy_card, policy_hash, public_policy_view
+from flowmemory_compiler.pulsepass import ScopedProofRequest, build_pulsepass, demo_passport, scoped_proof
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -95,13 +97,38 @@ class FlowCompilerTest(unittest.TestCase):
 
     def test_flowbond_demo_releases_or_pays_bond(self):
         cases = flowbond_demo_cases()
-        self.assertEqual(len(cases), 2)
+        self.assertEqual(len(cases), 3)
         self.assertTrue(cases[0]["result"]["passed"])
         self.assertEqual(cases[0]["result"]["settlement"], "RELEASE_BOND_TO_AGENT")
         self.assertFalse(cases[1]["result"]["passed"])
         self.assertEqual(cases[1]["result"]["settlement"], "PAY_BOND_TO_USER")
-        self.assertIn("max_slippage_exceeded", cases[1]["result"]["violations"])
+        self.assertIn("payment_without_delivery", cases[1]["result"]["violations"])
+        self.assertIn("missing_WorkDeliveryEnvelope", cases[1]["result"]["violations"])
+        self.assertFalse(cases[2]["result"]["passed"])
+        self.assertIn("PaymentReceiptEnvelope_wrong_obligation", cases[2]["result"]["violations"])
         self.assertTrue(cases[1]["result"]["flowPulse"]["pulseId"].startswith("sha256:"))
+
+    def test_policycard_public_view_hides_private_fields(self):
+        card = demo_policy_card()
+        public = public_policy_view(card)
+        self.assertEqual(public["policyHash"], policy_hash(card))
+        self.assertNotIn("user_id", public)
+        self.assertNotIn("obligation_id", public)
+        self.assertIn("WorkDeliveryEnvelope", public["required_evidence"])
+
+    def test_pulsepass_scoped_proofs_hide_raw_receipts(self):
+        passport = demo_passport()
+        proof = scoped_proof(passport, ScopedProofRequest("has_completed_warranted_action", threshold=1))
+        self.assertTrue(proof["passed"])
+        self.assertIn("raw_receipts", proof["hidden"])
+        self.assertNotIn("receipts", proof["revealed"])
+
+    def test_pulsepass_can_fail_threshold_without_revealing_history(self):
+        receipts = [case["result"] for case in flowbond_demo_cases()]
+        passport = build_pulsepass("user:local-demo", receipts)
+        proof = scoped_proof(passport, ScopedProofRequest("has_three_completed_warranted_actions", threshold=3))
+        self.assertFalse(proof["passed"])
+        self.assertEqual(proof["countBucket"], "1")
 
 
 def _case(case_id):
