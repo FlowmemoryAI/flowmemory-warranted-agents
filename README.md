@@ -27,6 +27,14 @@ It rejects traces with:
 
 ## Demo
 
+Compile a plan into derived evidence requirements:
+
+```powershell
+python -m flowmemory_compiler.cli compile --plan examples/plans/coding_tests_passed_plan.json --pretty
+```
+
+Run the bundled future-trace conformance cases:
+
 ```powershell
 python -m flowmemory_compiler.cli demo --pretty
 ```
@@ -46,9 +54,9 @@ Impossible futures ordinary rails would accept:
   ...
 
 Summary:
-  futures checked: 10
+  futures checked: 11
   valid futures accepted: 3/3
-  impossible futures rejected: 7/7
+  impossible futures rejected: 8/8
   escaped impossible futures: 0
 ```
 
@@ -73,4 +81,3 @@ FlowCompiler v0 does not claim:
 Wallets can sign. Payments can settle. Tests can run.
 
 FlowCompiler asks whether the resulting history is admissible under declared evidence envelopes.
-

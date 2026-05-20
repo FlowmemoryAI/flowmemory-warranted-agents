@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .checker import check_trace
-from .compiler import compile_trace
+from .compiler import compile_plan, compile_trace
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,8 +23,11 @@ def main(argv: list[str] | None = None) -> int:
     demo.add_argument("--pretty", action="store_true")
     demo.add_argument("--json", action="store_true")
 
-    compile_cmd = sub.add_parser("compile", help="Compile one FutureTrace into a FlowProgram.")
-    compile_cmd.add_argument("--trace", required=True)
+    compile_cmd = sub.add_parser("compile", help="Compile an AgentPlan or FutureTrace into a FlowProgram.")
+    compile_src = compile_cmd.add_mutually_exclusive_group(required=True)
+    compile_src.add_argument("--plan")
+    compile_src.add_argument("--trace")
+    compile_cmd.add_argument("--pretty", action="store_true")
 
     check = sub.add_parser("check", help="Check one FutureTrace.")
     check.add_argument("--trace", required=True)
@@ -42,8 +45,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if all(_matches_expected(result, case) for result, case in zip(results, cases)) else 1
 
     if args.command == "compile":
-        trace = _load_json(Path(args.trace))
-        print(json.dumps(compile_trace(trace), indent=2, sort_keys=True))
+        if args.plan:
+            program = compile_plan(_load_json(Path(args.plan)))
+        else:
+            program = compile_trace(_load_json(Path(args.trace)))
+        if args.pretty:
+            _print_compile(program)
+        else:
+            print(json.dumps(program, indent=2, sort_keys=True))
         return 0
 
     if args.command == "check":
@@ -99,6 +108,26 @@ def _print_single(result: dict[str, Any]) -> None:
         _print_forbidden_core(result)
 
 
+def _print_compile(program: dict[str, Any]) -> None:
+    print("FlowCompiler Compile")
+    print()
+    print("Plan:")
+    print(f"  sourcePlanId: {program.get('sourcePlanId')}")
+    print(f"  rootfieldId: {program.get('rootfieldId')}")
+    print(f"  compileStatus: {program.get('compileStatus')}")
+    print()
+    print("Derived requirements:")
+    for index, item in enumerate(program.get("derivedRequirements", []), start=1):
+        subject = item.get("claim") or item.get("stepId")
+        print(f"  R{index} {item['requirement']} [{item['kind']}] from {subject}")
+        print(f"     because: {item['because']}")
+    print()
+    print("Binding constraints:")
+    for index, item in enumerate(program.get("bindingConstraints", []), start=1):
+        print(f"  B{index} {item['constraint']}")
+        print(f"     because: {item['because']}")
+
+
 def _print_forbidden_core(result: dict[str, Any]) -> None:
     first = result["faults"][0]
     print(f"Forbidden core for {result['caseId']} ({first['fault']}):")
@@ -128,4 +157,3 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

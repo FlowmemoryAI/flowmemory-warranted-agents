@@ -28,6 +28,8 @@ Required fields:
 - `compileStatus`
 - `requiredPulses`
 - `requiredEnvelopes`
+- `derivedRequirements`
+- `bindingConstraints`
 - `requiredPasses`
 
 ### EvidenceEnvelope
@@ -55,7 +57,26 @@ A `ForbiddenCore` is a deterministic one-minimal set of atoms that keep a histor
 
 A `RepairInstruction` tells an agent how to repair the trace or downgrade the claim.
 
+## Required V0 Demonstrations
+
+V0 must show:
+
+- a compile view that derives evidence requirements from an `AgentPlan`;
+- accepted valid futures;
+- rejected impossible futures;
+- forbidden cores for the first failing atoms;
+- repair instructions for each rejection.
+
+The core commerce fixture is `payment_receipt_without_discharge`.
+
+Rule:
+
+```text
+PaymentReceiptEnvelope present != obligation_closed
+```
+
+The obligation closes only when a matching `DischargeEnvelope` exists.
+
 ## Non-Claims
 
 FlowCompiler v0 is not production verification, custody, wallet enforcement, x402 settlement, code correctness proof, semantic truth proof, model correctness proof, GPU acceleration, or live chain infrastructure.
-

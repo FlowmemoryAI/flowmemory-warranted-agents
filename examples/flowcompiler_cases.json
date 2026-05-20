@@ -340,6 +340,38 @@
           }
         }
       ]
+    },
+    {
+      "caseId": "FC-BAD-008",
+      "label": "payment_receipt_without_discharge",
+      "expectedStatus": "REJECTED",
+      "ordinaryRails": ["payment_requirement_satisfied", "payment_receipt_observed"],
+      "currentRootfieldHead": "sha256:head-10",
+      "plan": {
+        "schema": "flowmemory.agent_plan.v0",
+        "planId": "plan-payment-no-discharge",
+        "rootfieldId": "agent-commerce:buyer:seller:task-10",
+        "declaredRootfieldHead": "sha256:head-10",
+        "steps": [
+          { "stepId": "pay-1", "type": "x402_payment" },
+          { "stepId": "close-1", "type": "close_obligation" }
+        ],
+        "finalClaims": ["obligation_closed"]
+      },
+      "envelopes": [
+        {
+          "schema": "flowmemory.evidence_envelope.v0",
+          "envelopeId": "env-payment-no-discharge",
+          "envelopeType": "PaymentReceiptEnvelope",
+          "stepId": "pay-1",
+          "observedSequence": 1,
+          "fields": {
+            "paymentRequirementHash": "sha256:pay-req-c",
+            "receiptStatus": "settled",
+            "txHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      ]
     }
   ]
 }

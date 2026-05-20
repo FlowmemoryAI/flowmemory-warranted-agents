@@ -1,0 +1,11 @@
+{
+  "schema": "flowmemory.agent_plan.v0",
+  "planId": "plan-coding-tests-passed",
+  "rootfieldId": "repo:demo/task-compile-view",
+  "declaredRootfieldHead": "sha256:head-compile-view",
+  "steps": [
+    { "stepId": "patch-1", "type": "patch_files" },
+    { "stepId": "test-1", "type": "run_tests" }
+  ],
+  "finalClaims": ["tests_passed"]
+}

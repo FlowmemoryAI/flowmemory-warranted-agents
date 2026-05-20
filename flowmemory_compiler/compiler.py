@@ -42,6 +42,8 @@ def compile_plan(plan: dict[str, Any]) -> dict[str, Any]:
 
     required_envelopes: list[dict[str, Any]] = []
     required_pulses: list[dict[str, Any]] = []
+    derived_requirements: list[dict[str, Any]] = []
+    binding_constraints: list[dict[str, Any]] = []
     surfaces: list[str] = []
     faults: list[dict[str, Any]] = []
 
@@ -64,6 +66,14 @@ def compile_plan(plan: dict[str, Any]) -> dict[str, Any]:
         pulse_type = _pulse_for_step(step_type)
         if pulse_type:
             required_pulses.append({"stepId": step["stepId"], "pulseType": pulse_type})
+            derived_requirements.append(
+                {
+                    "requirement": pulse_type,
+                    "kind": "pulse",
+                    "stepId": step["stepId"],
+                    "because": f"{step_type} creates a {pulse_type}",
+                }
+            )
 
         for envelope_type in REQUIRED_ENVELOPES_BY_STEP[step_type]:
             required_envelopes.append(
@@ -72,11 +82,28 @@ def compile_plan(plan: dict[str, Any]) -> dict[str, Any]:
                     "envelopeType": envelope_type,
                 }
             )
+            derived_requirements.append(
+                {
+                    "requirement": envelope_type,
+                    "kind": "envelope",
+                    "stepId": step["stepId"],
+                    "because": f"{step_type} must be backed by {envelope_type}",
+                }
+            )
 
     for claim in plan.get("finalClaims", []):
         for envelope_type in CLAIM_REQUIREMENTS.get(claim, []):
             if not any(item["envelopeType"] == envelope_type for item in required_envelopes):
                 required_envelopes.append({"stepId": "final", "envelopeType": envelope_type})
+            derived_requirements.append(
+                {
+                    "requirement": envelope_type,
+                    "kind": "claim-envelope",
+                    "claim": claim,
+                    "because": f"final claim {claim} requires {envelope_type}",
+                }
+            )
+        binding_constraints.extend(_binding_constraints_for_claim(claim))
 
     return {
         "schema": "flowmemory.flowprogram.v0",
@@ -88,6 +115,8 @@ def compile_plan(plan: dict[str, Any]) -> dict[str, Any]:
         "surfaces": surfaces,
         "requiredPulses": required_pulses,
         "requiredEnvelopes": required_envelopes,
+        "derivedRequirements": derived_requirements,
+        "bindingConstraints": binding_constraints,
         "requiredPasses": [
             "SurfacePass",
             "EnvelopeRequirementPass",
@@ -128,3 +157,45 @@ def _pulse_for_step(step_type: str) -> str | None:
         "session_action": "ActionPulse",
     }.get(step_type)
 
+
+def _binding_constraints_for_claim(claim: str) -> list[dict[str, Any]]:
+    return {
+        "tests_passed": [
+            {
+                "constraint": "TestRunEnvelope.exitCode == 0",
+                "because": "tests_passed requires a successful test run",
+            },
+            {
+                "constraint": "TestRunEnvelope.treeHash == DiffEnvelope.afterTreeHash",
+                "because": "tests must belong to the patched tree",
+            },
+            {
+                "constraint": "DiffEnvelope.observedSequence < TestRunEnvelope.observedSequence",
+                "because": "tests must run after the patch they verify",
+            },
+        ],
+        "obligation_closed": [
+            {
+                "constraint": "PaymentReceiptEnvelope.paymentRequirementHash == DischargeEnvelope.paymentRequirementHash",
+                "because": "payment settlement is not obligation discharge unless the discharge envelope binds the same obligation",
+            }
+        ],
+        "swap_observed": [
+            {
+                "constraint": "FlowPulseReceiptEnvelope present",
+                "because": "the swap transaction is not the memory artifact",
+            }
+        ],
+        "compute_reused": [
+            {
+                "constraint": "ComputeReuseEnvelope.sourceFmmState == FMM_CONFORMING",
+                "because": "cache/fingerprint match is not enough when source memory is inconsistent",
+            }
+        ],
+        "verified": [
+            {
+                "constraint": "VerificationEnvelope present",
+                "because": "verified claims require explicit verification evidence",
+            }
+        ],
+    }.get(claim, [])

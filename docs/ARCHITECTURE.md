@@ -26,6 +26,18 @@ V0 is local and deterministic.
 
 It does not enforce wallets, settle payments, run agents, prove semantic truth, prove code correctness, or verify production chains. It demonstrates that ordinary rails can accept an action surface while FlowCompiler rejects the impossible history behind it.
 
+The compiler claim depends on one concrete behavior:
+
+```text
+FlowCompiler derives required envelopes from plans; it does not merely inspect logs after the fact.
+```
+
+Run the derivation view:
+
+```powershell
+python -m flowmemory_compiler.cli compile --plan examples/plans/coding_tests_passed_plan.json --pretty
+```
+
 ## Passes
 
 1. `SurfacePass`: maps plan steps to action surfaces.
@@ -36,7 +48,16 @@ It does not enforce wallets, settle payments, run agents, prove semantic truth, 
 6. `ForbiddenCorePass`: extracts one deterministic minimal failing core.
 7. `RepairPass`: returns a concrete repair or downgrade path.
 
+## Category Cases
+
+The v0 demo includes 11 futures:
+
+- 3 valid futures accepted;
+- 8 impossible futures rejected;
+- 0 escaped impossible histories.
+
+The most important commerce case is `payment_receipt_without_discharge`: payment settlement can be observed while the obligation remains unclosed because no `DischargeEnvelope` exists.
+
 ## Strong Line
 
 FlowCompiler is the history compiler for autonomous agents: it turns proposed actions into required proof envelopes and rejects futures that cannot become legal machine histories.
-

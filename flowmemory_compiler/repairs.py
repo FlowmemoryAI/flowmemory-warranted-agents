@@ -46,6 +46,16 @@ REPAIR_MAP = {
             "claimReplacement": "payment observed; obligation discharge not established",
         },
     ],
+    "payment_success_without_obligation_discharge": [
+        {
+            "action": "attach_discharge_envelope",
+            "reason": "payment receipt does not by itself close the declared obligation",
+        },
+        {
+            "action": "downgrade_claim",
+            "claimReplacement": "payment observed; obligation discharge not established",
+        },
+    ],
     "stale_memory_head_spend": [
         {
             "action": "refresh_rootfield_head",
@@ -107,4 +117,3 @@ def repair_instruction(fault: str, context: dict[str, Any] | None = None) -> dic
         "fault": fault,
         "instructions": instructions,
     }
-

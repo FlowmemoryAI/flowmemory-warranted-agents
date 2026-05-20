@@ -20,6 +20,7 @@ def check_trace(trace: dict[str, Any]) -> dict[str, Any]:
     _check_required_envelopes(program, by_step, faults)
     _check_rootfield_head(trace, faults)
     _check_coding_tree(trace, by_type, faults)
+    _check_payment_without_discharge(trace, by_type, faults)
     _check_payment_discharge(by_type, faults)
     _check_compute_reuse(by_type, faults)
     _check_swap_flowpulse(trace, by_type, faults)
@@ -46,7 +47,7 @@ def _check_required_envelopes(
     for required in program.get("requiredEnvelopes", []):
         step_id = required["stepId"]
         envelope_type = required["envelopeType"]
-        if envelope_type == "FlowPulseReceiptEnvelope":
+        if envelope_type in {"DischargeEnvelope", "FlowPulseReceiptEnvelope"}:
             continue
         if step_id == "final":
             continue
@@ -135,6 +136,28 @@ def _check_payment_discharge(by_type: dict[str, list[dict[str, Any]]], faults: l
                     atom("PaymentReceiptEnvelope.paymentRequirementHash", payment_fields.get("paymentRequirementHash")),
                     atom("DischargeEnvelope.paymentRequirementHash", discharge_fields.get("paymentRequirementHash")),
                     atom("DischargeEnvelope.obligationId", discharge_fields.get("obligationId")),
+                ],
+            )
+        )
+
+
+def _check_payment_without_discharge(
+    trace: dict[str, Any],
+    by_type: dict[str, list[dict[str, Any]]],
+    faults: list[dict[str, Any]],
+) -> None:
+    if "obligation_closed" not in trace["plan"].get("finalClaims", []):
+        return
+    payment = _first(by_type, "PaymentReceiptEnvelope")
+    if payment and "DischargeEnvelope" not in by_type:
+        faults.append(
+            _fault(
+                "payment_success_without_obligation_discharge",
+                [
+                    atom("ordinaryRails.paymentReceiptObserved", "payment_receipt_observed" in trace.get("ordinaryRails", [])),
+                    atom("envelopes.PaymentReceiptEnvelope", "present"),
+                    atom("requiredEnvelope.DischargeEnvelope", "missing"),
+                    atom("finalClaims.obligation_closed", True),
                 ],
             )
         )

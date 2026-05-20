@@ -21,9 +21,9 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(len(valid), 3)
         self.assertTrue(all(check_trace(case)["status"] == "ACCEPTED" for case in valid))
 
-    def test_seven_impossible_futures_are_rejected(self):
+    def test_eight_impossible_futures_are_rejected(self):
         invalid = [case for case in CASES if case["caseId"].startswith("FC-BAD")]
-        self.assertEqual(len(invalid), 7)
+        self.assertEqual(len(invalid), 8)
         self.assertTrue(all(check_trace(case)["status"] == "REJECTED" for case in invalid))
 
     def test_compiler_derives_required_envelopes(self):
@@ -32,6 +32,8 @@ class FlowCompilerTest(unittest.TestCase):
         envelope_types = {item["envelopeType"] for item in program["requiredEnvelopes"]}
         self.assertIn("PaymentReceiptEnvelope", envelope_types)
         self.assertIn("DischargeEnvelope", envelope_types)
+        self.assertTrue(program["derivedRequirements"])
+        self.assertTrue(program["bindingConstraints"])
 
     def test_wrong_tree_forbidden_core_contains_patch_and_test_hashes(self):
         result = check_trace(_case("FC-BAD-001"))
@@ -54,6 +56,12 @@ class FlowCompilerTest(unittest.TestCase):
     def test_verified_claim_requires_verification_envelope(self):
         result = check_trace(_case("FC-BAD-007"))
         self.assertEqual(_fault(result, "verified_without_envelope")["fault"], "verified_without_envelope")
+
+    def test_payment_receipt_without_discharge_is_rejected(self):
+        result = check_trace(_case("FC-BAD-008"))
+        fault = _fault(result, "payment_success_without_obligation_discharge")
+        self.assertEqual(result["faults"][0]["fault"], "payment_success_without_obligation_discharge")
+        self.assertIn({"path": "requiredEnvelope.DischargeEnvelope", "value": "missing"}, fault["forbiddenCore"]["minimalCore"])
 
     def test_repairs_are_emitted_for_each_rejected_case(self):
         for case in CASES:
