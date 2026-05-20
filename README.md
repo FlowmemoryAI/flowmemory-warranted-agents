@@ -118,6 +118,7 @@ python -m flowmemory_compiler.cli agent-framework-demo --pretty
 python -m flowmemory_compiler.cli policycard-demo --pretty
 python -m flowmemory_compiler.cli flowbond-demo --pretty
 python -m flowmemory_compiler.cli pulsepass-demo --pretty
+python -m flowmemory_compiler.cli bond-ledger-demo --pretty
 ```
 
 Expected shape:
@@ -136,6 +137,9 @@ FlowBond:
 
 PulsePass:
   scoped proofs reveal predicates, not raw history
+
+BondLedger:
+  local accounting releases one warranty to the agent and pays one warranty to the user
 ```
 
 Run the conformance engine:

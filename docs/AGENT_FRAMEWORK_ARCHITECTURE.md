@@ -12,6 +12,7 @@ AgentManifest
   -> PolicyCard
   -> AgentProposal
   -> FlowBond
+  -> BondLedger
   -> FlowPulse
   -> PulsePass
   -> ScopedProof
@@ -80,7 +81,18 @@ If the required evidence closes the obligation, the bond releases to the agent.
 
 If payment happened without delivery, acceptance, or the correct obligation link, the bond pays the user.
 
-## Layer 6: FlowPulse
+## Layer 6: BondLedger
+
+The local `BondLedger` models the warranty accounting path:
+
+- bond locked;
+- bond released to the agent;
+- bond paid to the user;
+- ledger receipt emitted.
+
+This layer is local accounting only. It does not claim custody, escrow, wallet execution, or production settlement.
+
+## Layer 7: FlowPulse
 
 The FlowPulse is the memory artifact.
 
@@ -97,7 +109,7 @@ It records:
 
 The action is not the memory. The FlowPulse is the memory artifact.
 
-## Layer 7: PulsePass
+## Layer 8: PulsePass
 
 PulsePass is the user's private receipt passport.
 
@@ -137,6 +149,7 @@ Did the agent close the promise it bonded?
 
 ```powershell
 python -m flowmemory_compiler.cli agent-framework-demo --pretty
+python -m flowmemory_compiler.cli bond-ledger-demo --pretty
 ```
 
 Expected output shape:
@@ -172,4 +185,3 @@ The v0 claim is:
 ```text
 The framework can model a warranted-agent action from manifest to private scoped proof, using deterministic local receipts.
 ```
-

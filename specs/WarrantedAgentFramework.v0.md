@@ -58,6 +58,7 @@ PolicyCard is derived.
 AgentProposal commits bond to policy hash.
 Action emits evidence envelopes.
 FlowBond settles pass/fail.
+BondLedger records local lock/release/pay accounting.
 FlowPulse-style receipt records outcome.
 PulsePass stores receipt.
 ScopedProof reveals only a predicate.
@@ -77,4 +78,3 @@ The framework rejects or pays the user when:
 ## Non-Claims
 
 This spec does not define custody, live wallet execution, production x402 integration, production arbitration, zero-knowledge proof generation, work-quality verification, semantic truth, or production verifier infrastructure.
-

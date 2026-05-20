@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from flowmemory_compiler.agent_framework import run_agent_framework_demo
+from flowmemory_compiler.bond_ledger import run_bond_ledger_demo
 from flowmemory_compiler.capture import capture_command
 from flowmemory_compiler.checker import check_trace
 from flowmemory_compiler.compiler import compile_trace
@@ -142,6 +143,16 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(result["pulsePass"]["receiptCount"], 2)
         self.assertEqual(len(result["scopedProofs"]), 2)
         self.assertTrue(all(proof["proofHash"].startswith("sha256:") for proof in result["scopedProofs"]))
+
+    def test_bond_ledger_releases_and_pays(self):
+        result = run_bond_ledger_demo()
+        receipts = result["ledger"]["receipts"]
+        event_types = [receipt["eventType"] for receipt in receipts]
+        self.assertEqual(event_types, ["BOND_LOCKED", "RELEASE_BOND_TO_AGENT", "BOND_LOCKED", "PAY_BOND_TO_USER"])
+        accounts = result["ledger"]["accounts"]
+        self.assertEqual(accounts["agent:work-warranty-demo"], 75_00)
+        self.assertEqual(accounts["user:local-demo"], 25_00)
+        self.assertTrue(all(receipt["receiptId"].startswith("sha256:") for receipt in receipts))
 
 
 def _case(case_id):

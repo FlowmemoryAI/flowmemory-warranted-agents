@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .agent_framework import run_agent_framework_demo
+from .bond_ledger import run_bond_ledger_demo
 from .capture import capture_command
 from .checker import check_trace
 from .compiler import compile_plan, compile_trace
@@ -59,6 +60,10 @@ def main(argv: list[str] | None = None) -> int:
     framework = sub.add_parser("agent-framework-demo", help="Run the full warranted-agent framework demo.")
     framework.add_argument("--pretty", action="store_true")
     framework.add_argument("--json", action="store_true")
+
+    ledger = sub.add_parser("bond-ledger-demo", help="Run local bond ledger accounting demo.")
+    ledger.add_argument("--pretty", action="store_true")
+    ledger.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -138,6 +143,14 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(demo_result, indent=2, sort_keys=True))
         else:
             _print_agent_framework(demo_result)
+        return 0
+
+    if args.command == "bond-ledger-demo":
+        demo_result = run_bond_ledger_demo()
+        if args.json:
+            print(json.dumps(demo_result, indent=2, sort_keys=True))
+        else:
+            _print_bond_ledger(demo_result)
         return 0
 
     return 2
@@ -294,6 +307,24 @@ def _print_agent_framework(result: dict[str, Any]) -> None:
     print()
     print("Result:")
     print("  The agent framework turns promises into warranted receipts and user-owned scoped proof.")
+
+
+def _print_bond_ledger(result: dict[str, Any]) -> None:
+    print("FlowMemory Local Bond Ledger")
+    print()
+    for receipt in result["ledger"]["receipts"]:
+        print(f"{receipt['sequence']:<2} {receipt['eventType']:<24} {receipt['bondId']}")
+        print(f"   receiptId: {receipt['receiptId']}")
+    print()
+    print("Accounts:")
+    for account_id, balance in result["ledger"]["accounts"].items():
+        print(f"  {account_id:<32} {balance}")
+    print()
+    print("Result:")
+    print("  Local accounting shows one warranty released to the agent and one paid to the user.")
+    print()
+    print("Non-claims:")
+    print("  local ledger only; no custody, escrow, wallet, or production settlement.")
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:

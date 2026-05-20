@@ -20,4 +20,5 @@ jobs:
           python -m flowmemory_compiler.cli flowbond-demo --pretty
           python -m flowmemory_compiler.cli pulsepass-demo --pretty
           python -m flowmemory_compiler.cli agent-framework-demo --pretty
+          python -m flowmemory_compiler.cli bond-ledger-demo --pretty
           python -m flowmemory_compiler.cli demo --pretty
