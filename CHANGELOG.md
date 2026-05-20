@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.1
+
+Launch packet and adapter conformance hardening.
+
+- Added adapter conformance harness and CLI.
+- Added launch packet CLI and CI check.
+- Added reviewer walkthrough.
+- Enabled default `python -m unittest` discovery.
+- Added compact integration artifacts after the initial 0.2.0 framework release.
+
 ## 0.2.0
 
 Warranted-agent framework build-out.

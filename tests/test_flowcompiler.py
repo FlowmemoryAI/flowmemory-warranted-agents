@@ -216,7 +216,7 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(result["schema"], "flowmemory.warranted_agents_launch_packet.v0")
         self.assertTrue(result["readiness"]["passed"])
         self.assertTrue(result["packetHash"].startswith("sha256:"))
-        self.assertEqual(result["version"], "0.2.0")
+        self.assertEqual(result["version"], "0.2.1")
 
     def test_agent_adapter_boundary_quotes_and_executes(self):
         adapter = DemoWarrantedAgentAdapter()
