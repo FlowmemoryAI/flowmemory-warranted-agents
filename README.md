@@ -150,6 +150,7 @@ python -m flowmemory_compiler.cli pulsepass-demo --pretty
 python -m flowmemory_compiler.cli bond-ledger-demo --pretty
 python -m flowmemory_compiler.cli private-compute-demo --pretty
 python -m flowmemory_compiler.cli agent-adapter-demo --pretty
+python -m flowmemory_compiler.cli adapter-conformance-demo --pretty
 python -m flowmemory_compiler.cli agent-registry-demo --pretty
 python -m flowmemory_compiler.cli agent-runtime-demo --pretty
 python -m flowmemory_compiler.cli evidence-schema --pretty
@@ -165,6 +166,9 @@ AgentFramework:
 
 AgentAdapter:
   boundary where future real agents plug into warranties
+
+AdapterConformance:
+  local checks for the adapter contract before launch
 
 AgentRegistry:
   eligible agents are matched by warranty evidence and bond capacity
@@ -263,6 +267,7 @@ Start here for review:
 - `docs/DEVELOPER_HANDOFF.md`
 - `docs/REVIEWER_WALKTHROUGH.md`
 - `docs/ADAPTER_CONTRACT.md`
+- `docs/ADAPTER_CONFORMANCE.md`
 - `docs/AGENT_FRAMEWORK_ARCHITECTURE.md`
 - `docs/ARCHITECTURE_DIAGRAMS.md`
 - `docs/THREAT_MODEL.md`

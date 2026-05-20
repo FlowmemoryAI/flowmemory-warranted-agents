@@ -97,6 +97,7 @@ Code:
 
 - `flowmemory_compiler/agent_framework.py`
 - `flowmemory_compiler/agent_adapter.py`
+- `flowmemory_compiler/adapter_conformance.py`
 - `flowmemory_compiler/agent_registry.py`
 - `flowmemory_compiler/agent_runtime.py`
 - `flowmemory_compiler/evidence_schema.py`
@@ -108,6 +109,7 @@ Code:
 Docs:
 
 - `docs/AGENT_FRAMEWORK_ARCHITECTURE.md`
+- `docs/ADAPTER_CONFORMANCE.md`
 - `docs/AGENT_RUNTIME.md`
 - `docs/RUNTIME_STATE_MACHINE.md`
 - `docs/AGENT_REGISTRY.md`

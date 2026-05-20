@@ -7,6 +7,7 @@ import json
 from typing import Any
 
 from .agent_framework import run_agent_framework_demo
+from .adapter_conformance import run_adapter_conformance_demo
 from .agent_registry import run_registry_demo
 from .agent_runtime import run_runtime_demo
 from .bond_ledger import run_bond_ledger_demo
@@ -27,6 +28,7 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
     bond_ledger = run_bond_ledger_demo()
     registry = run_registry_demo()
     runtime = run_runtime_demo()
+    adapter_conformance = run_adapter_conformance_demo()
     evidence_schema = evidence_schema_report()
     flowcompiler_results = [check_trace(case) for case in flowcompiler_cases]
 
@@ -41,6 +43,7 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
             "WorkRequest",
             "PolicyCard",
             "AgentProposal",
+            "AdapterConformance",
             "AgentRegistry",
             "AgentRuntime",
             "EvidenceSchema",
@@ -54,6 +57,10 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
         ],
         "policyCard": public_policy_view(demo_policy_card()),
         "agentFramework": _framework_summary(framework),
+        "adapterConformance": {
+            "passed": adapter_conformance["passed"],
+            "checkCount": len(adapter_conformance["checks"]),
+        },
         "agentRegistry": _registry_summary(registry),
         "agentRuntime": _runtime_summary(runtime),
         "evidenceSchema": {

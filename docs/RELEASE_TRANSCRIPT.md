@@ -8,6 +8,7 @@ It summarizes:
 - AgentManifest;
 - WorkRequest;
 - AgentProposal;
+- AdapterConformance;
 - AgentRegistry;
 - AgentRuntime;
 - EvidenceSchema;
@@ -36,6 +37,10 @@ Expected summary:
 FlowBond:
   releasedToAgent: 1
   paidToUser:      2
+
+AdapterConformance:
+  passed:     True
+  checkCount: 8
 
 AgentRegistry:
   eligibleAgents: 1

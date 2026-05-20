@@ -5,6 +5,7 @@ from pathlib import Path
 
 from flowmemory_compiler.agent_adapter import DemoWarrantedAgentAdapter, run_adapter_demo
 from flowmemory_compiler.agent_framework import demo_request, run_agent_framework_demo
+from flowmemory_compiler.adapter_conformance import run_adapter_conformance_demo
 from flowmemory_compiler.agent_registry import run_registry_demo
 from flowmemory_compiler.agent_runtime import run_runtime_demo
 from flowmemory_compiler.bond_ledger import run_bond_ledger_demo
@@ -224,6 +225,13 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(len(result["settlements"]), 2)
         self.assertTrue(result["settlements"][0]["passed"])
         self.assertFalse(result["settlements"][1]["passed"])
+
+    def test_adapter_conformance_demo_passes(self):
+        result = run_adapter_conformance_demo()
+        self.assertEqual(result["schema"], "flowmemory.adapter_conformance.v0")
+        self.assertTrue(result["passed"])
+        self.assertTrue(all(check["passed"] for check in result["checks"]))
+        self.assertEqual(len(result["checks"]), 8)
 
     def test_agent_registry_matches_warranted_agent(self):
         result = run_registry_demo()

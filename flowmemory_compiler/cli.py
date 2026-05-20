@@ -9,6 +9,7 @@ from typing import Any
 
 from .agent_framework import run_agent_framework_demo
 from .agent_adapter import run_adapter_demo
+from .adapter_conformance import run_adapter_conformance_demo
 from .agent_registry import run_registry_demo
 from .agent_runtime import run_runtime_demo
 from .bond_ledger import run_bond_ledger_demo
@@ -71,6 +72,10 @@ def main(argv: list[str] | None = None) -> int:
     adapter = sub.add_parser("agent-adapter-demo", help="Run the warranted-agent adapter boundary demo.")
     adapter.add_argument("--pretty", action="store_true")
     adapter.add_argument("--json", action="store_true")
+
+    adapter_conformance = sub.add_parser("adapter-conformance-demo", help="Run warranted-agent adapter conformance checks.")
+    adapter_conformance.add_argument("--pretty", action="store_true")
+    adapter_conformance.add_argument("--json", action="store_true")
 
     registry = sub.add_parser("agent-registry-demo", help="Run warranted-agent registry and discovery demo.")
     registry.add_argument("--pretty", action="store_true")
@@ -187,6 +192,14 @@ def main(argv: list[str] | None = None) -> int:
         else:
             _print_agent_adapter(demo_result)
         return 0
+
+    if args.command == "adapter-conformance-demo":
+        demo_result = run_adapter_conformance_demo()
+        if args.json:
+            print(json.dumps(demo_result, indent=2, sort_keys=True))
+        else:
+            _print_adapter_conformance(demo_result)
+        return 0 if demo_result["passed"] else 1
 
     if args.command == "agent-registry-demo":
         demo_result = run_registry_demo()
@@ -419,6 +432,20 @@ def _print_agent_adapter(result: dict[str, Any]) -> None:
     print("  The adapter boundary shows where future real agents plug into FlowMemory warranties.")
 
 
+def _print_adapter_conformance(result: dict[str, Any]) -> None:
+    print("FlowMemory Adapter Conformance")
+    print()
+    print(f"adapter: {result['adapter']}")
+    print(f"status:  {'PASSED' if result['passed'] else 'FAILED'}")
+    print()
+    for check in result["checks"]:
+        status = "PASS" if check["passed"] else "FAIL"
+        print(f"  {check['checkId']:<42} {status} {check['detail']}")
+    print()
+    print("Result:")
+    print("  A future agent adapter can be checked against the warranted-agent contract before launch.")
+
+
 def _print_agent_registry(result: dict[str, Any]) -> None:
     print("FlowMemory Warranted Agent Registry")
     print()
@@ -519,6 +546,10 @@ def _print_release_transcript(result: dict[str, Any]) -> None:
     print("FlowBond:")
     print(f"  releasedToAgent: {result['flowBond']['releasedToAgent']}")
     print(f"  paidToUser:      {result['flowBond']['paidToUser']}")
+    print()
+    print("AdapterConformance:")
+    print(f"  passed:     {result['adapterConformance']['passed']}")
+    print(f"  checkCount: {result['adapterConformance']['checkCount']}")
     print()
     print("AgentRegistry:")
     print(f"  eligibleAgents: {result['agentRegistry']['eligibleAgents']}")
