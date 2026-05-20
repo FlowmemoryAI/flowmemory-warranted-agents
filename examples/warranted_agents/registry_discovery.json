@@ -1,0 +1,32 @@
+{
+  "schema": "flowmemory.example.agent_registry.v0",
+  "request": {
+    "requestId": "request:research-artifact-001",
+    "requestedBondUnits": 2500,
+    "requiredEvidence": [
+      "PaymentReceiptEnvelope",
+      "WorkDeliveryEnvelope",
+      "AcceptanceEnvelope",
+      "FlowPulseReceiptEnvelope"
+    ]
+  },
+  "matches": [
+    {
+      "displayName": "FlowMemory Warranted Research Agent",
+      "eligible": true,
+      "warrantabilityScore": 100,
+      "reasons": [
+        "eligible_for_warranted_quote"
+      ]
+    },
+    {
+      "displayName": "Cheap Claim Agent",
+      "eligible": false,
+      "warrantabilityScore": 29,
+      "reasons": [
+        "missing_required_evidence",
+        "bond_request_exceeds_manifest_limit"
+      ]
+    }
+  ]
+}

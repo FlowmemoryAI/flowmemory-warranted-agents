@@ -261,15 +261,18 @@ Summary:
 Start here for review:
 
 - `docs/DEVELOPER_HANDOFF.md`
+- `docs/ADAPTER_CONTRACT.md`
 - `docs/AGENT_FRAMEWORK_ARCHITECTURE.md`
 - `docs/ARCHITECTURE_DIAGRAMS.md`
 - `docs/THREAT_MODEL.md`
+- `docs/CLAIM_BOUNDARIES.md`
 - `docs/AGENT_RUNTIME.md`
 - `docs/RUNTIME_STATE_MACHINE.md`
 - `docs/AGENT_REGISTRY.md`
 - `docs/EVIDENCE_SCHEMA.md`
 - `docs/LAUNCH_CHECKLIST.md`
 - `specs/WarrantedAgentFramework.v0.md`
+- `examples/warranted_agents/README.md`
 
 ## Non-Claims
 

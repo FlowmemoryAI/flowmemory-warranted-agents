@@ -1,0 +1,28 @@
+{
+  "schema": "flowmemory.example.warranted_agent.v0",
+  "caseId": "WA-OK-001",
+  "label": "research_success",
+  "path": [
+    "manifest_loaded",
+    "policy_quoted",
+    "bond_locked",
+    "action_executed",
+    "flowbond_settled",
+    "private_proof_ready",
+    "runtime_finalized"
+  ],
+  "policy": {
+    "promiseType": "obligation_completion",
+    "requiredEvidence": [
+      "PaymentReceiptEnvelope",
+      "WorkDeliveryEnvelope",
+      "AcceptanceEnvelope",
+      "FlowPulseReceiptEnvelope"
+    ],
+    "bondUnits": 2500
+  },
+  "outcome": {
+    "settlement": "RELEASE_BOND_TO_AGENT",
+    "finalStatus": "WARRANTY_RELEASED"
+  }
+}

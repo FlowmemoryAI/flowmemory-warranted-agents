@@ -1,0 +1,37 @@
+{
+  "schema": "flowmemory.example.warranted_agent.v0",
+  "caseId": "WA-BAD-001",
+  "label": "payment_without_delivery",
+  "path": [
+    "manifest_loaded",
+    "policy_quoted",
+    "bond_locked",
+    "action_executed",
+    "flowbond_settled",
+    "private_proof_ready",
+    "runtime_finalized"
+  ],
+  "policy": {
+    "promiseType": "obligation_completion",
+    "requiredEvidence": [
+      "PaymentReceiptEnvelope",
+      "WorkDeliveryEnvelope",
+      "AcceptanceEnvelope",
+      "FlowPulseReceiptEnvelope"
+    ],
+    "bondUnits": 2500
+  },
+  "missingEvidence": [
+    "WorkDeliveryEnvelope",
+    "AcceptanceEnvelope"
+  ],
+  "violations": [
+    "missing_AcceptanceEnvelope",
+    "missing_WorkDeliveryEnvelope",
+    "payment_without_delivery"
+  ],
+  "outcome": {
+    "settlement": "PAY_BOND_TO_USER",
+    "finalStatus": "USER_PAID_FROM_BOND"
+  }
+}
