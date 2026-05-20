@@ -266,12 +266,15 @@ Start here for review:
 - `docs/ARCHITECTURE_DIAGRAMS.md`
 - `docs/THREAT_MODEL.md`
 - `docs/CLAIM_BOUNDARIES.md`
+- `docs/MARKETING_POSITIONING.md`
 - `docs/AGENT_RUNTIME.md`
 - `docs/RUNTIME_STATE_MACHINE.md`
 - `docs/AGENT_REGISTRY.md`
 - `docs/EVIDENCE_SCHEMA.md`
 - `docs/LAUNCH_CHECKLIST.md`
 - `specs/WarrantedAgentFramework.v0.md`
+- `specs/RuntimeStateMachine.v0.md`
+- `specs/EvidenceSchemas.v0.md`
 - `examples/warranted_agents/README.md`
 
 ## Non-Claims
