@@ -12,6 +12,7 @@ from flowmemory_compiler.flowbond import demo_cases as flowbond_demo_cases
 from flowmemory_compiler.policycards import demo_policy_card, policy_hash, public_policy_view
 from flowmemory_compiler.private_compute import run_private_compute_demo
 from flowmemory_compiler.pulsepass import ScopedProofRequest, build_pulsepass, demo_passport, scoped_proof
+from flowmemory_compiler.release_transcript import build_release_transcript
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -162,6 +163,18 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertTrue(all(item["transcriptHash"].startswith("sha256:") for item in result["programResults"]))
         self.assertTrue(all("raw_receipts" in item["hidden"] for item in result["programResults"]))
         self.assertTrue(result["programResults"][0]["passed"])
+
+    def test_release_transcript_summarizes_all_layers(self):
+        result = build_release_transcript(CASES)
+        self.assertEqual(result["schema"], "flowmemory.warranted_agents_release_transcript.v0")
+        self.assertIn("AgentManifest", result["stack"])
+        self.assertIn("PrivateCompute", result["stack"])
+        self.assertTrue(result["transcriptHash"].startswith("sha256:"))
+        self.assertEqual(result["flowBond"]["releasedToAgent"], 1)
+        self.assertEqual(result["flowBond"]["paidToUser"], 2)
+        self.assertEqual(result["flowCompiler"]["validAccepted"], 3)
+        self.assertEqual(result["flowCompiler"]["invalidRejected"], 8)
+        self.assertEqual(result["flowCompiler"]["escapedImpossibleHistories"], 0)
 
 
 def _case(case_id):

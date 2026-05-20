@@ -16,6 +16,7 @@ from .flowbond import demo_cases as flowbond_demo_cases
 from .policycards import demo_policy_card, public_policy_view
 from .private_compute import run_private_compute_demo
 from .pulsepass import demo_passport, demo_proofs
+from .release_transcript import build_release_transcript
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -69,6 +70,10 @@ def main(argv: list[str] | None = None) -> int:
     private_compute = sub.add_parser("private-compute-demo", help="Run local private memory computation demo.")
     private_compute.add_argument("--pretty", action="store_true")
     private_compute.add_argument("--json", action="store_true")
+
+    transcript = sub.add_parser("release-transcript", help="Print canonical package transcript.")
+    transcript.add_argument("--pretty", action="store_true")
+    transcript.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -164,6 +169,15 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(demo_result, indent=2, sort_keys=True))
         else:
             _print_private_compute(demo_result)
+        return 0
+
+    if args.command == "release-transcript":
+        cases = _load_cases(DEFAULT_CASES)
+        transcript_result = build_release_transcript(cases)
+        if args.json:
+            print(json.dumps(transcript_result, indent=2, sort_keys=True))
+        else:
+            _print_release_transcript(transcript_result)
         return 0
 
     return 2
@@ -358,6 +372,41 @@ def _print_private_compute(result: dict[str, Any]) -> None:
     print()
     print("Non-claims:")
     print("  local only; no zero-knowledge, TEE, full privacy, or production private compute.")
+
+
+def _print_release_transcript(result: dict[str, Any]) -> None:
+    print("FlowMemory Warranted Agents Release Transcript")
+    print()
+    print(f"coreLine:       {result['coreLine']}")
+    print(f"transcriptHash: {result['transcriptHash']}")
+    print()
+    print("Stack:")
+    print("  " + " -> ".join(result["stack"]))
+    print()
+    print("FlowBond:")
+    print(f"  releasedToAgent: {result['flowBond']['releasedToAgent']}")
+    print(f"  paidToUser:      {result['flowBond']['paidToUser']}")
+    print()
+    print("BondLedger:")
+    print(f"  events: {', '.join(result['bondLedger']['events'])}")
+    print()
+    print("PulsePass:")
+    print(f"  vaultCommitment: {result['pulsePass']['vaultCommitment']}")
+    print(f"  receiptCount:    {result['pulsePass']['receiptCount']}")
+    print()
+    print("PrivateCompute:")
+    for program in result["privateCompute"]["programs"]:
+        status = "PASS" if program["passed"] else "FAIL"
+        print(f"  {program['programId']:<38} {status} {program['transcriptHash']}")
+    print()
+    print("FlowCompiler:")
+    compiler = result["flowCompiler"]
+    print(f"  valid accepted:                 {compiler['validAccepted']}/{compiler['validTotal']}")
+    print(f"  impossible histories rejected:  {compiler['invalidRejected']}/{compiler['invalidTotal']}")
+    print(f"  escaped impossible histories:   {compiler['escapedImpossibleHistories']}")
+    print()
+    print("Non-claims:")
+    print("  " + ", ".join(result["notClaims"]))
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:

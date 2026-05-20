@@ -120,6 +120,7 @@ python -m flowmemory_compiler.cli flowbond-demo --pretty
 python -m flowmemory_compiler.cli pulsepass-demo --pretty
 python -m flowmemory_compiler.cli bond-ledger-demo --pretty
 python -m flowmemory_compiler.cli private-compute-demo --pretty
+python -m flowmemory_compiler.cli release-transcript --pretty
 ```
 
 Expected shape:
@@ -144,6 +145,9 @@ BondLedger:
 
 PrivateCompute:
   scoped predicates over PulsePass without exposing raw receipts
+
+ReleaseTranscript:
+  one canonical offline object that summarizes the full framework
 ```
 
 Run the conformance engine:
