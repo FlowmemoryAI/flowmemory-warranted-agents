@@ -20,6 +20,10 @@ FlowMemory makes AI work receipt-native: model calls, tool calls, proposed
 actions, on-chain execution, and outcome settlement become one inspectable memory
 trail.
 
+PulsePods package that trail into a pod-level product primitive: a memory-native
+compute pod that chooses routes by successful FlowPulse outcomes instead of raw
+token price.
+
 ## PulseMesh
 
 ```text
@@ -32,6 +36,32 @@ User Policy
   -> OutcomePulse
   -> FlowBond settlement
   -> PulsePass scoped proof
+```
+
+## PulsePods
+
+PulsePods turn PulseMesh into a launchable agent pod shape:
+
+```text
+PulsePodManifest
+  -> ProviderPromise
+  -> PulseRouter route
+  -> FlowPulse-linked OutcomePulse
+  -> PulsePass scoped claim
+  -> x402-compatible federation offer
+```
+
+The market line is:
+
+```text
+Pod systems route compute. FlowMemory routes memory-backed outcomes.
+```
+
+The demo command is:
+
+```powershell
+python -m flowmemory_compiler.cli pulsepod-demo --pretty
+python -m flowmemory_compiler.cli pulsepod-adversary --pretty
 ```
 
 The important shift is economic:

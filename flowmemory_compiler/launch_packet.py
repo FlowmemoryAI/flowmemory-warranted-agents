@@ -10,6 +10,7 @@ from typing import Any
 from . import __version__
 from .claim_gate import scan_claims
 from .outcome_router import run_pulserouter_adversary_suite, run_pulserouter_demo
+from .pulsepods import run_pulsepod_adversary_suite, run_pulsepod_demo
 from .release_transcript import build_release_transcript
 
 
@@ -18,6 +19,8 @@ def build_launch_packet(flowcompiler_cases: list[dict[str, Any]], root: Path) ->
     claims = scan_claims(root)
     pulserouter = run_pulserouter_demo()
     pulserouter_adversary = run_pulserouter_adversary_suite()
+    pulsepod = run_pulsepod_demo()
+    pulsepod_adversary = run_pulsepod_adversary_suite()
     readiness_checks = [
         {
             "check": "claim_gate_passed",
@@ -49,6 +52,16 @@ def build_launch_packet(flowcompiler_cases: list[dict[str, Any]], root: Path) ->
             "passed": pulserouter_adversary["passed"],
             "detail": f"caught={pulserouter_adversary['caught']}/{pulserouter_adversary['total']}",
         },
+        {
+            "check": "pulsepod_demo_has_no_validation_faults",
+            "passed": not pulsepod["validationFaults"],
+            "detail": f"pod={pulsepod['manifest']['podId']}",
+        },
+        {
+            "check": "pulsepod_adversary_suite_passed",
+            "passed": pulsepod_adversary["passed"],
+            "detail": f"caught={pulsepod_adversary['caught']}/{pulsepod_adversary['total']}",
+        },
     ]
     packet = {
         "schema": "flowmemory.warranted_agents_launch_packet.v0",
@@ -66,6 +79,8 @@ def build_launch_packet(flowcompiler_cases: list[dict[str, Any]], root: Path) ->
             "python -m flowmemory_compiler.cli adapter-conformance-demo --pretty",
             "python -m flowmemory_compiler.cli pulserouter-demo --pretty",
             "python -m flowmemory_compiler.cli pulserouter-adversary --pretty",
+            "python -m flowmemory_compiler.cli pulsepod-demo --pretty",
+            "python -m flowmemory_compiler.cli pulsepod-adversary --pretty",
             "python -m flowmemory_compiler.cli claim-gate --pretty",
         ],
         "notClaims": transcript["notClaims"],

@@ -27,6 +27,7 @@ from flowmemory_compiler.outcome_router import (
 from flowmemory_compiler.policycards import demo_policy_card, policy_hash, public_policy_view
 from flowmemory_compiler.private_compute import run_private_compute_demo
 from flowmemory_compiler.production_readiness import PRODUCTION_GATES, build_production_readiness_packet
+from flowmemory_compiler.pulsepods import run_pulsepod_adversary_suite, run_pulsepod_demo, validate_pulsepod_report
 from flowmemory_compiler.pulsepass import ScopedProofRequest, build_pulsepass, demo_passport, scoped_proof
 from flowmemory_compiler.release_transcript import build_release_transcript
 from flowmemory_compiler.runtime_state_machine import ACTION_EXECUTED, MANIFEST_LOADED, RuntimeStateMachine
@@ -240,17 +241,44 @@ class FlowCompilerTest(unittest.TestCase):
         result["flowPulseLink"]["commitment"] = "sha256:wrong"
         self.assertIn("flowpulse_commitment_mismatch", validate_outcome_report(result))
 
+    def test_pulsepod_demo_builds_memory_native_compute_pod(self):
+        result = run_pulsepod_demo()
+        self.assertEqual(result["schema"], "flowmemory.pulsepod_demo.v0")
+        self.assertEqual(result["validationFaults"], [])
+        self.assertEqual(result["manifest"]["routingObjective"], "cost_per_successful_flowpulse_outcome")
+        self.assertEqual(result["route"]["selectedProviderId"], "provider:private-bonded")
+        self.assertEqual(result["launchDemo"]["reveal"], "The cheapest route lost. The useful bonded route won.")
+        self.assertTrue(result["pulsePassClaim"]["claimId"].startswith("sha256:"))
+        self.assertTrue(result["pulsePassClaim"]["sourcePulseSetHash"].startswith("sha256:"))
+        self.assertNotIn("rawPrompt", result["pulsePassClaim"]["reveals"])
+        self.assertEqual(result["federationOffer"]["paymentRail"], "x402_compatible_reference")
+
+    def test_pulsepod_adversary_suite_catches_all_cases(self):
+        result = run_pulsepod_adversary_suite()
+        self.assertEqual(result["schema"], "flowmemory.pulsepod_adversary_suite.v0")
+        self.assertGreaterEqual(result["total"], 30)
+        self.assertEqual(result["caught"], result["total"])
+        self.assertTrue(result["passed"])
+
+    def test_pulsepod_validation_rejects_public_overclaim(self):
+        result = run_pulsepod_demo()
+        result["publicClaims"].append("FlowMemory is a live compute marketplace.")
+        self.assertIn("public_claim_overclaim", validate_pulsepod_report(result))
+
     def test_release_transcript_summarizes_all_layers(self):
         result = build_release_transcript(CASES)
         self.assertEqual(result["schema"], "flowmemory.warranted_agents_release_transcript.v0")
         self.assertIn("AgentManifest", result["stack"])
         self.assertIn("PrivateCompute", result["stack"])
         self.assertIn("PulseRouter", result["stack"])
+        self.assertIn("PulsePods", result["stack"])
         self.assertTrue(result["transcriptHash"].startswith("sha256:"))
         self.assertEqual(result["flowBond"]["releasedToAgent"], 1)
         self.assertEqual(result["flowBond"]["paidToUser"], 2)
         self.assertEqual(result["pulseRouter"]["selectedProviderId"], "provider:private-bonded")
         self.assertEqual(result["pulseRouter"]["adversaryCaught"], result["pulseRouter"]["adversaryTotal"])
+        self.assertEqual(result["pulsePods"]["selectedProviderId"], "provider:private-bonded")
+        self.assertEqual(result["pulsePods"]["adversaryCaught"], result["pulsePods"]["adversaryTotal"])
         self.assertEqual(result["flowCompiler"]["validAccepted"], 3)
         self.assertEqual(result["flowCompiler"]["invalidRejected"], 8)
         self.assertEqual(result["flowCompiler"]["escapedImpossibleHistories"], 0)
@@ -260,7 +288,7 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(result["schema"], "flowmemory.warranted_agents_launch_packet.v0")
         self.assertTrue(result["readiness"]["passed"])
         self.assertTrue(result["packetHash"].startswith("sha256:"))
-        self.assertEqual(result["version"], "0.3.0")
+        self.assertEqual(result["version"], "0.4.0")
 
     def test_production_readiness_packet_marks_external_gates_blocking(self):
         result = build_production_readiness_packet(CASES, ROOT)

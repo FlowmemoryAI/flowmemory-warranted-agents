@@ -4,7 +4,7 @@ This document is for a developer reviewing FlowMemory Warranted Agents as an arc
 
 ## One Sentence
 
-FlowMemory Warranted Agents turns an agent promise into a deterministic machine history: manifest, request, policy, proposal, registry match, runtime phases, evidence schema checks, bond settlement, FlowPulse memory, PulseRouter outcome routing, private receipt proof, and conformance checks.
+FlowMemory Warranted Agents turns an agent promise into a deterministic machine history: manifest, request, policy, proposal, registry match, runtime phases, evidence schema checks, bond settlement, FlowPulse memory, PulseRouter outcome routing, PulsePods memory-native pod packaging, private receipt proof, and conformance checks.
 
 ## Plain English
 
@@ -23,6 +23,7 @@ Here is the bond behind the promise.
 Here is the memory receipt after the action.
 Here is a private proof the user can carry later.
 Here is why the selected provider was useful, not just cheap.
+Here is the pod-level package that can federate this work without exposing raw history.
 ```
 
 That is the framework.
@@ -106,6 +107,7 @@ Code:
 - `flowmemory_compiler/pulsepass.py`
 - `flowmemory_compiler/private_compute.py`
 - `flowmemory_compiler/outcome_router.py`
+- `flowmemory_compiler/pulsepods.py`
 - `flowmemory_compiler/claim_gate.py`
 - `flowmemory_compiler/production_readiness.py`
 
@@ -121,6 +123,7 @@ Docs:
 - `docs/RELEASE_TRANSCRIPT.md`
 - `docs/OUTCOME_SETTLED_AI.md`
 - `docs/PULSEROUTER_ARCHITECTURE.md`
+- `docs/PULSEPODS_ARCHITECTURE.md`
 - `docs/PRODUCTION_READINESS_ARCHITECTURE.md`
 - `docs/PRODUCTION_GATE_CHECKLIST.md`
 - `docs/OPERATOR_RUNBOOK.md`
@@ -131,6 +134,7 @@ Spec:
 
 - `specs/WarrantedAgentFramework.v0.md`
 - `specs/PulseRouter.v0.md`
+- `specs/PulsePods.v0.md`
 
 ## Verification Commands
 
@@ -142,6 +146,8 @@ python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
 python -m flowmemory_compiler.cli pulserouter-demo --pretty
 python -m flowmemory_compiler.cli pulserouter-adversary --pretty
+python -m flowmemory_compiler.cli pulsepod-demo --pretty
+python -m flowmemory_compiler.cli pulsepod-adversary --pretty
 python -m flowmemory_compiler.cli claim-gate --pretty
 python -m flowmemory_compiler.cli production-readiness --pretty
 ```
@@ -166,6 +172,12 @@ PulseRouter adds the outcome layer:
 
 ```text
 Route intelligence by receipt-backed successful outcomes, not raw token price.
+```
+
+PulsePods add the pod layer:
+
+```text
+Route agent compute by successful FlowPulse outcomes, not raw token price.
 ```
 
 Production status:

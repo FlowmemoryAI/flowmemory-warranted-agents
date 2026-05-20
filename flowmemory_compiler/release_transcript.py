@@ -17,6 +17,7 @@ from .flowbond import demo_cases as flowbond_demo_cases
 from .outcome_router import run_pulserouter_adversary_suite, run_pulserouter_demo
 from .policycards import demo_policy_card, public_policy_view
 from .private_compute import run_private_compute_demo
+from .pulsepods import run_pulsepod_adversary_suite, run_pulsepod_demo
 from .pulsepass import demo_passport, demo_proofs
 
 
@@ -33,6 +34,8 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
     evidence_schema = evidence_schema_report()
     pulserouter = run_pulserouter_demo()
     pulserouter_adversary = run_pulserouter_adversary_suite()
+    pulsepod = run_pulsepod_demo()
+    pulsepod_adversary = run_pulsepod_adversary_suite()
     flowcompiler_results = [check_trace(case) for case in flowcompiler_cases]
 
     valid = [item for item in flowcompiler_results if item["caseId"].startswith("FC-OK")]
@@ -58,6 +61,7 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
             "ScopedProof",
             "PulseRouter",
             "OutcomePulse",
+            "PulsePods",
             "FlowCompiler",
         ],
         "policyCard": public_policy_view(demo_policy_card()),
@@ -101,6 +105,21 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
             "adversaryCaught": pulserouter_adversary["caught"],
             "adversaryTotal": pulserouter_adversary["total"],
             "adversaryPassed": pulserouter_adversary["passed"],
+        },
+        "pulsePods": {
+            "categoryClaim": pulsepod["categoryClaim"],
+            "podId": pulsepod["manifest"]["podId"],
+            "manifestHash": pulsepod["manifest"]["manifestHash"],
+            "routingObjective": pulsepod["manifest"]["routingObjective"],
+            "selectedProviderId": pulsepod["route"]["selectedProviderId"],
+            "flowPulseId": pulsepod["launchDemo"]["flowPulseId"],
+            "outcomePulseId": pulsepod["launchDemo"]["outcomePulseId"],
+            "pulsePassPredicate": pulsepod["pulsePassClaim"]["predicate"],
+            "federationPaymentRail": pulsepod["federationOffer"]["paymentRail"],
+            "validationFaults": pulsepod["validationFaults"],
+            "adversaryCaught": pulsepod_adversary["caught"],
+            "adversaryTotal": pulsepod_adversary["total"],
+            "adversaryPassed": pulsepod_adversary["passed"],
         },
         "flowCompiler": {
             "validAccepted": sum(item["status"] == "ACCEPTED" for item in valid),

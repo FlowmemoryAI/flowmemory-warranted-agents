@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+Memory-native PulsePods launch slice.
+
+- Added PulsePods local proof for memory-native compute pods that route agent work by successful FlowPulse outcomes, not raw token price.
+- Added PulsePodManifest, ProviderPromise, PulsePassClaim, FederationOffer, pulse graph, scoreboard, demo memory credit, and validation model.
+- Added `pulsepod-demo` and `pulsepod-adversary` CLI commands.
+- Added 34-case adversarial suite covering pod identity, routing objective, route drift, provider promise drift, FlowPulse source/finality, outcome linkage, PulsePass privacy, federation evidence, demo credit boundaries, raw content leakage, and public overclaims.
+- Added PulsePods architecture docs and `PulsePods.v0` spec.
+- Added PulsePods checks to release transcript, launch packet, CI demos, and local tests.
+
 ## 0.3.0
 
 Outcome-settled AI and PulseRouter launch slice.

@@ -24,6 +24,7 @@ from .outcome_router import run_pulserouter_adversary_suite, run_pulserouter_dem
 from .policycards import demo_policy_card, public_policy_view
 from .private_compute import run_private_compute_demo
 from .production_readiness import build_production_readiness_packet
+from .pulsepods import run_pulsepod_adversary_suite, run_pulsepod_demo
 from .pulsepass import demo_passport, demo_proofs
 from .release_transcript import build_release_transcript
 
@@ -125,6 +126,14 @@ def main(argv: list[str] | None = None) -> int:
     pulserouter_adversary = sub.add_parser("pulserouter-adversary", help="Run PulseRouter adversarial validation cases.")
     pulserouter_adversary.add_argument("--pretty", action="store_true")
     pulserouter_adversary.add_argument("--json", action="store_true")
+
+    pulsepod = sub.add_parser("pulsepod-demo", help="Run the memory-native PulsePod launch demo.")
+    pulsepod.add_argument("--pretty", action="store_true")
+    pulsepod.add_argument("--json", action="store_true")
+
+    pulsepod_adversary = sub.add_parser("pulsepod-adversary", help="Run PulsePod adversarial validation cases.")
+    pulsepod_adversary.add_argument("--pretty", action="store_true")
+    pulsepod_adversary.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -313,6 +322,22 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
             _print_pulserouter_adversary(result)
+        return 0 if result["passed"] else 1
+
+    if args.command == "pulsepod-demo":
+        result = run_pulsepod_demo()
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            _print_pulsepod(result)
+        return 0 if not result["validationFaults"] else 1
+
+    if args.command == "pulsepod-adversary":
+        result = run_pulsepod_adversary_suite()
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            _print_pulsepod_adversary(result)
         return 0 if result["passed"] else 1
 
     return 2
@@ -638,6 +663,14 @@ def _print_release_transcript(result: dict[str, Any]) -> None:
     print(f"  adversaryCaught: {result['pulseRouter']['adversaryCaught']}/{result['pulseRouter']['adversaryTotal']}")
     print(f"  portableUserMemory: {result['pulseRouter']['portableUserMemoryPredicate']}")
     print()
+    print("PulsePods:")
+    print(f"  podId: {result['pulsePods']['podId']}")
+    print(f"  selectedProvider: {result['pulsePods']['selectedProviderId']}")
+    print(f"  flowPulseId: {result['pulsePods']['flowPulseId']}")
+    print(f"  outcomePulseId: {result['pulsePods']['outcomePulseId']}")
+    print(f"  adversaryCaught: {result['pulsePods']['adversaryCaught']}/{result['pulsePods']['adversaryTotal']}")
+    print(f"  pulsePassPredicate: {result['pulsePods']['pulsePassPredicate']}")
+    print()
     print("FlowCompiler:")
     compiler = result["flowCompiler"]
     print(f"  valid accepted:                 {compiler['validAccepted']}/{compiler['validTotal']}")
@@ -747,6 +780,57 @@ def _print_pulserouter_adversary(result: dict[str, Any]) -> None:
     print(f"Caught: {result['caught']}/{result['total']}")
     print("Result:")
     print("  PulseRouter rejects manipulated outcome histories before they become portable memory.")
+
+
+def _print_pulsepod(result: dict[str, Any]) -> None:
+    print("FlowMemory PulsePods")
+    print()
+    print("Category:")
+    print(f"  {result['categoryClaim']}")
+    print()
+    print("Pod:")
+    print(f"  podId:        {result['manifest']['podId']}")
+    print(f"  manifestHash: {result['manifest']['manifestHash']}")
+    print(f"  objective:    {result['manifest']['routingObjective']}")
+    print()
+    print("Selected route:")
+    print(f"  provider: {result['launchDemo']['selectedProviderId']}")
+    print(f"  FlowPulse: {result['launchDemo']['flowPulseId']}")
+    print(f"  OutcomePulse: {result['launchDemo']['outcomePulseId']}")
+    print(f"  costPerSuccessfulOutcomeUnits: {result['launchDemo']['effectiveCostPerSuccessfulOutcomeUnits']}")
+    print()
+    print("Scoreboard:")
+    for row in result["scoreboard"]:
+        status = "SELECTED" if row["selected"] else ("ELIGIBLE" if row["eligible"] else "BLOCKED")
+        cps = row["costPerSuccessfulOutcomeUnits"]
+        cps_text = "n/a" if cps is None else str(cps)
+        print(f"  {row['providerId']:<30} {status:<8} raw={row['rawPriceUnits']} score={row['scoreUnits']} cps={cps_text}")
+    print()
+    print("PulsePass claim:")
+    print(f"  predicate: {result['pulsePassClaim']['predicate']}")
+    print(f"  claimId:   {result['pulsePassClaim']['claimId']}")
+    print(f"  hides:     {', '.join(result['pulsePassClaim']['hides'])}")
+    print()
+    print("Reveal:")
+    print(f"  {result['launchDemo']['reveal']}")
+    print()
+    print("Result:")
+    print("  PulsePods route agent compute by receipt-backed successful outcomes, not raw token price.")
+    print()
+    print("Non-claims:")
+    print("  " + ", ".join(result["notClaims"]))
+
+
+def _print_pulsepod_adversary(result: dict[str, Any]) -> None:
+    print("FlowMemory PulsePod Adversary Suite")
+    print()
+    for item in result["results"]:
+        status = "PASS" if item["caught"] else "FAIL"
+        print(f"  {item['caseId']:<12} {item['label']:<42} {status} {item['expectedFault']}")
+    print()
+    print(f"Caught: {result['caught']}/{result['total']}")
+    print("Result:")
+    print("  PulsePods reject pod, route, federation, privacy, and outcome-memory drift before it becomes a portable claim.")
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:

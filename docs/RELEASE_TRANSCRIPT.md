@@ -17,6 +17,9 @@ It summarizes:
 - FlowPulse;
 - PulsePass;
 - PrivateCompute;
+- PulseRouter;
+- OutcomePulse;
+- PulsePods;
 - FlowCompiler.
 
 Run:
@@ -53,6 +56,14 @@ AgentRuntime:
 EvidenceSchema:
   envelopeCount: 4
   envelopeTypes: PaymentReceiptEnvelope, WorkDeliveryEnvelope, AcceptanceEnvelope, FlowPulseReceiptEnvelope
+
+PulseRouter:
+  selectedProvider: provider:private-bonded
+  adversaryCaught: 26/26
+
+PulsePods:
+  podId: pulsepod:memory-native-defi-demo
+  adversaryCaught: 34/34
 
 FlowCompiler:
   valid accepted:                 3/3

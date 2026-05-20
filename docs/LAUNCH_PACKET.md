@@ -19,6 +19,8 @@ It summarizes:
 - bundled impossible-history rejection status;
 - PulseRouter outcome-routing validation;
 - PulseRouter adversarial validation;
+- PulsePods memory-native pod validation;
+- PulsePods adversarial validation;
 - reviewer commands.
 
 Expected shape:
@@ -35,6 +37,8 @@ Checks:
   flowcompiler_rejects_all_bundled_impossible_histories  PASS
   pulserouter_demo_has_no_validation_faults              PASS
   pulserouter_adversary_suite_passed                     PASS
+  pulsepod_demo_has_no_validation_faults                 PASS
+  pulsepod_adversary_suite_passed                        PASS
 ```
 
 ## Why This Matters

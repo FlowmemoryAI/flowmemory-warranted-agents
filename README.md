@@ -5,7 +5,7 @@ Generic agents make claims. FlowMemory agents can leave warranted receipts.
 FlowMemory Warranted Agents is a local public proof for a new agent primitive:
 
 ```text
-AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> AgentRegistry -> AgentRuntime -> EvidenceSchema -> FlowBond -> FlowPulse -> PulsePass -> PulseRouter -> OutcomePulse -> ScopedProof
+AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> AgentRegistry -> AgentRuntime -> EvidenceSchema -> FlowBond -> FlowPulse -> PulsePass -> PulseRouter -> OutcomePulse -> PulsePods -> ScopedProof
 ```
 
 The user defines the promise. The agent bonds the promise. The action emits receipt-backed memory. The user privately carries proof of what happened.
@@ -41,6 +41,10 @@ PulsePass gives the user portable private proof.
 PolicyCards let the user's rules travel between agents.
 
 PulseRouter routes providers by successful outcomes, not raw token price.
+
+PulsePods package that route into a memory-native compute pod: provider promises,
+policy, FlowPulse evidence, outcome settlement, private PulsePass proof, and an
+x402-compatible federation reference.
 
 ## Product Stack
 
@@ -155,6 +159,28 @@ The public claim is:
 The cheapest model is not the cheapest successful route.
 ```
 
+### PulsePods
+
+PulsePods are FlowMemory's answer to generic private compute pods and agent
+clusters.
+
+Generic pods pool identity, keys, credits, models, and compute.
+
+PulsePods add the missing outcome-memory layer:
+
+```text
+Which route produced successful receipt-backed work under the user's policy?
+```
+
+The demo does not ask which model is cheapest. It asks which route can produce a
+successful FlowPulse-linked outcome and a private PulsePass claim.
+
+The public claim is:
+
+```text
+PulsePods route agent compute by successful FlowPulse outcomes, not raw token price.
+```
+
 ## Demos
 
 Run the warranted-agent stack:
@@ -174,6 +200,8 @@ python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
 python -m flowmemory_compiler.cli pulserouter-demo --pretty
 python -m flowmemory_compiler.cli pulserouter-adversary --pretty
+python -m flowmemory_compiler.cli pulsepod-demo --pretty
+python -m flowmemory_compiler.cli pulsepod-adversary --pretty
 python -m flowmemory_compiler.cli claim-gate --pretty
 python -m flowmemory_compiler.cli launch-packet --pretty
 python -m flowmemory_compiler.cli production-readiness --pretty
@@ -219,6 +247,9 @@ PrivateCompute:
 
 PulseRouter:
   routes three providers by expected successful outcome, emits pulses, links to FlowPulse, and catches 26 adversarial manipulations
+
+PulsePods:
+  wraps PulseRouter into a memory-native compute pod, emits a PulsePass claim, exposes an x402-compatible federation reference, and catches 34 adversarial manipulations
 
 ReleaseTranscript:
   one canonical offline object that summarizes the full framework
@@ -305,6 +336,7 @@ Start here for review:
 - `docs/MARKETING_POSITIONING.md`
 - `docs/OUTCOME_SETTLED_AI.md`
 - `docs/PULSEROUTER_ARCHITECTURE.md`
+- `docs/PULSEPODS_ARCHITECTURE.md`
 - `docs/BUILD_TEST_VERIFY_LOOP.md`
 - `docs/AGENT_RUNTIME.md`
 - `docs/RUNTIME_STATE_MACHINE.md`
@@ -323,6 +355,7 @@ Start here for review:
 - `specs/EvidenceSchemas.v0.md`
 - `specs/RuntimeTelemetry.v0.md`
 - `specs/PulseRouter.v0.md`
+- `specs/PulsePods.v0.md`
 - `examples/warranted_agents/README.md`
 
 ## Non-Claims
@@ -373,4 +406,12 @@ UsePod finds cheap compute. FlowMemory finds useful compute.
 
 ```text
 Outcome-settled AI: agents paid by successful work, not tokens.
+```
+
+```text
+PulsePods: memory-native compute pods for agents that leave receipts.
+```
+
+```text
+Pod systems route compute. FlowMemory routes memory-backed outcomes.
 ```
