@@ -3,7 +3,8 @@ import sys
 import unittest
 from pathlib import Path
 
-from flowmemory_compiler.agent_framework import run_agent_framework_demo
+from flowmemory_compiler.agent_adapter import DemoWarrantedAgentAdapter, run_adapter_demo
+from flowmemory_compiler.agent_framework import demo_request, run_agent_framework_demo
 from flowmemory_compiler.bond_ledger import run_bond_ledger_demo
 from flowmemory_compiler.capture import capture_command
 from flowmemory_compiler.checker import check_trace
@@ -175,6 +176,22 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(result["flowCompiler"]["validAccepted"], 3)
         self.assertEqual(result["flowCompiler"]["invalidRejected"], 8)
         self.assertEqual(result["flowCompiler"]["escapedImpossibleHistories"], 0)
+
+    def test_agent_adapter_boundary_quotes_and_executes(self):
+        adapter = DemoWarrantedAgentAdapter()
+        policy, proposal = adapter.quote(demo_request())
+        self.assertEqual(proposal.policy_hash, policy_hash(policy))
+        success = adapter.execute(policy, mode="success")
+        failure = adapter.execute(policy, mode="payment_without_delivery")
+        self.assertEqual(success.action_id, "action:adapter-success")
+        self.assertEqual(failure.action_id, "action:adapter-payment-without-delivery")
+
+    def test_agent_adapter_demo_settles_success_and_failure(self):
+        result = run_adapter_demo()
+        self.assertEqual(result["schema"], "flowmemory.agent_adapter_demo.v0")
+        self.assertEqual(len(result["settlements"]), 2)
+        self.assertTrue(result["settlements"][0]["passed"])
+        self.assertFalse(result["settlements"][1]["passed"])
 
 
 def _case(case_id):

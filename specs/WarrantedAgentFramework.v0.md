@@ -52,6 +52,7 @@ User-owned receipt vault and scoped proof surface.
 ## Valid Local Flow
 
 ```text
+AgentAdapter exposes manifest, quote, execute.
 AgentManifest supports required evidence.
 WorkRequest asks for a supported promise.
 PolicyCard is derived.

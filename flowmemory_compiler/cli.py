@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .agent_framework import run_agent_framework_demo
+from .agent_adapter import run_adapter_demo
 from .bond_ledger import run_bond_ledger_demo
 from .capture import capture_command
 from .checker import check_trace
@@ -62,6 +63,10 @@ def main(argv: list[str] | None = None) -> int:
     framework = sub.add_parser("agent-framework-demo", help="Run the full warranted-agent framework demo.")
     framework.add_argument("--pretty", action="store_true")
     framework.add_argument("--json", action="store_true")
+
+    adapter = sub.add_parser("agent-adapter-demo", help="Run the warranted-agent adapter boundary demo.")
+    adapter.add_argument("--pretty", action="store_true")
+    adapter.add_argument("--json", action="store_true")
 
     ledger = sub.add_parser("bond-ledger-demo", help="Run local bond ledger accounting demo.")
     ledger.add_argument("--pretty", action="store_true")
@@ -153,6 +158,14 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(demo_result, indent=2, sort_keys=True))
         else:
             _print_agent_framework(demo_result)
+        return 0
+
+    if args.command == "agent-adapter-demo":
+        demo_result = run_adapter_demo()
+        if args.json:
+            print(json.dumps(demo_result, indent=2, sort_keys=True, default=_json_default))
+        else:
+            _print_agent_adapter(demo_result)
         return 0
 
     if args.command == "bond-ledger-demo":
@@ -336,6 +349,24 @@ def _print_agent_framework(result: dict[str, Any]) -> None:
     print("  The agent framework turns promises into warranted receipts and user-owned scoped proof.")
 
 
+def _print_agent_adapter(result: dict[str, Any]) -> None:
+    print("FlowMemory Warranted Agent Adapter")
+    print()
+    print("Interface:")
+    print("  manifest() -> quote(request) -> execute(policy) -> settle(policy, outcome)")
+    print()
+    print(f"policyHash:   {result['policyHash']}")
+    print(f"proposalHash: {result['proposalHash']}")
+    print()
+    print("Settlements:")
+    for settlement in result["settlements"]:
+        status = "PASSED" if settlement["passed"] else "FAILED"
+        print(f"  {settlement['flowPulse']['actionId']:<40} {status} {settlement['settlement']}")
+    print()
+    print("Result:")
+    print("  The adapter boundary shows where future real agents plug into FlowMemory warranties.")
+
+
 def _print_bond_ledger(result: dict[str, Any]) -> None:
     print("FlowMemory Local Bond Ledger")
     print()
@@ -434,6 +465,12 @@ def _load_cases(path: Path) -> list[dict[str, Any]]:
 
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _json_default(value: Any) -> Any:
+    if hasattr(value, "__dataclass_fields__"):
+        return value.__dict__
+    raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
 
 
 if __name__ == "__main__":

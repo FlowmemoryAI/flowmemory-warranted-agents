@@ -35,6 +35,16 @@ It declares:
 
 This is not a marketplace profile. It is a machine-readable statement of what an agent is willing to bond.
 
+## Adapter Boundary
+
+Future real agents plug in through a narrow adapter:
+
+```text
+manifest() -> quote(request) -> execute(policy) -> settle(policy, outcome)
+```
+
+The local `DemoWarrantedAgentAdapter` proves the interface shape without claiming an external agent integration, wallet runtime, or production agent host.
+
 ## Layer 2: WorkRequest
 
 The `WorkRequest` is the user's desired outcome.
@@ -163,6 +173,7 @@ Did the agent close the promise it bonded?
 
 ```powershell
 python -m flowmemory_compiler.cli agent-framework-demo --pretty
+python -m flowmemory_compiler.cli agent-adapter-demo --pretty
 python -m flowmemory_compiler.cli bond-ledger-demo --pretty
 python -m flowmemory_compiler.cli private-compute-demo --pretty
 ```

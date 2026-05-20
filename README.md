@@ -120,6 +120,7 @@ python -m flowmemory_compiler.cli flowbond-demo --pretty
 python -m flowmemory_compiler.cli pulsepass-demo --pretty
 python -m flowmemory_compiler.cli bond-ledger-demo --pretty
 python -m flowmemory_compiler.cli private-compute-demo --pretty
+python -m flowmemory_compiler.cli agent-adapter-demo --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
 ```
 
@@ -128,6 +129,9 @@ Expected shape:
 ```text
 AgentFramework:
   manifest, request, policy, proposal, settlement, PulsePass, scoped proofs
+
+AgentAdapter:
+  boundary where future real agents plug into warranties
 
 PolicyCard:
   portable, hashable, bondable promise
