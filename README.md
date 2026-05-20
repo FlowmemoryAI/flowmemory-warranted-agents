@@ -261,6 +261,7 @@ Summary:
 Start here for review:
 
 - `docs/DEVELOPER_HANDOFF.md`
+- `docs/REVIEWER_WALKTHROUGH.md`
 - `docs/ADAPTER_CONTRACT.md`
 - `docs/AGENT_FRAMEWORK_ARCHITECTURE.md`
 - `docs/ARCHITECTURE_DIAGRAMS.md`
