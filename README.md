@@ -1,5 +1,8 @@
 # FlowMemory Warranted Agents
 
+[![CI](https://github.com/FlowmemoryAI/flowmemory-warranted-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/FlowmemoryAI/flowmemory-warranted-agents/actions/workflows/ci.yml)
+
+
 Generic agents make claims. FlowMemory agents can leave warranted receipts.
 
 FlowMemory Warranted Agents is a local public proof for a new agent primitive:
@@ -16,6 +19,28 @@ It is a buildable proof for a narrower and more marketable claim:
 
 ```text
 Specific agent promises can become portable warranties backed by FlowPulse memory.
+```
+
+## Status
+
+```text
+Local warranted-agent framework: PASS
+Public review package:            READY
+Production custody/settlement:    NOT_CLAIMED
+Production verifier network:      NOT_CLAIMED
+```
+
+This repository is a public R&D and conformance package. It is inspectable and
+runnable without production custody, settlement, or verifier infrastructure.
+
+
+## Quick Review
+
+```powershell
+python -m unittest discover -s tests -p "test_*.py"
+python -m flowmemory_compiler.cli release-transcript --pretty
+python -m flowmemory_compiler.cli launch-packet --pretty
+python -m flowmemory_compiler.cli production-readiness --pretty
 ```
 
 ## Why This Exists
