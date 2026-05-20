@@ -170,15 +170,15 @@ Do not claim FlowCompiler:
 - runs on Base;
 - is production verifier infrastructure.
 
-## Next Build Step
+## Local Capture Step
 
-The next credibility improvement is one real local capture command:
+The first local capture command now exists:
 
 ```powershell
-python -m flowmemory_compiler.cli capture-command --step test-1 --tree-hash sha256:tree-after -- npm test
+python -m flowmemory_compiler.cli capture-command --step test-1 --tree-hash sha256:tree-after -- python -c "print('ok')"
 ```
 
-That command should emit a `TestRunEnvelope` with:
+That command emits a `TestRunEnvelope` with:
 
 - command;
 - exit code;
@@ -187,5 +187,4 @@ That command should emit a `TestRunEnvelope` with:
 - stderr hash;
 - observed sequence.
 
-This would move FlowCompiler from fixture-only conformance into locally captured evidence without becoming an agent framework.
-
+This moves FlowCompiler from fixture-only conformance into locally captured evidence without becoming an agent framework.

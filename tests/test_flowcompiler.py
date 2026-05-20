@@ -1,7 +1,9 @@
 import json
+import sys
 import unittest
 from pathlib import Path
 
+from flowmemory_compiler.capture import capture_command
 from flowmemory_compiler.checker import check_trace
 from flowmemory_compiler.compiler import compile_trace
 
@@ -75,6 +77,20 @@ class FlowCompilerTest(unittest.TestCase):
     def test_no_escaped_impossible_histories(self):
         escaped = [case["caseId"] for case in CASES if case["caseId"].startswith("FC-BAD") and check_trace(case)["status"] == "ACCEPTED"]
         self.assertEqual(escaped, [])
+
+    def test_capture_command_emits_test_run_envelope(self):
+        envelope = capture_command(
+            step_id="test-1",
+            tree_hash="sha256:tree-after",
+            command=[sys.executable, "-c", "print('ok')"],
+            observed_sequence=3,
+        )
+        self.assertEqual(envelope["envelopeType"], "TestRunEnvelope")
+        self.assertEqual(envelope["stepId"], "test-1")
+        self.assertEqual(envelope["observedSequence"], 3)
+        self.assertEqual(envelope["fields"]["exitCode"], 0)
+        self.assertEqual(envelope["fields"]["treeHash"], "sha256:tree-after")
+        self.assertTrue(envelope["fields"]["stdoutHash"].startswith("sha256:"))
 
 
 def _case(case_id):

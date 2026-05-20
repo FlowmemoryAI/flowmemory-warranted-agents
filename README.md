@@ -39,6 +39,12 @@ Run the bundled future-trace conformance cases:
 python -m flowmemory_compiler.cli demo --pretty
 ```
 
+Capture one real local command as a `TestRunEnvelope`:
+
+```powershell
+python -m flowmemory_compiler.cli capture-command --step test-1 --tree-hash sha256:tree-after -- python -c "print('ok')"
+```
+
 Expected shape:
 
 ```text
@@ -75,6 +81,8 @@ FlowCompiler v0 does not claim:
 - GPU acceleration;
 - live Base deployment;
 - production verifier readiness.
+
+The local `capture-command` helper records command exit code and output hashes. It still does not prove code correctness, semantic truth, or production provenance.
 
 ## Positioning
 

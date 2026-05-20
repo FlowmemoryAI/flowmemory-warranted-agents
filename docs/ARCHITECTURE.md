@@ -38,6 +38,14 @@ Run the derivation view:
 python -m flowmemory_compiler.cli compile --plan examples/plans/coding_tests_passed_plan.json --pretty
 ```
 
+Capture one local command envelope:
+
+```powershell
+python -m flowmemory_compiler.cli capture-command --step test-1 --tree-hash sha256:tree-after -- python -c "print('ok')"
+```
+
+The capture helper emits command and output hashes. It does not claim production provenance or code correctness.
+
 ## Passes
 
 1. `SurfacePass`: maps plan steps to action surfaces.

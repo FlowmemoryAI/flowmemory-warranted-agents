@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .capture import capture_command
 from .checker import check_trace
 from .compiler import compile_plan, compile_trace
 
@@ -32,6 +33,12 @@ def main(argv: list[str] | None = None) -> int:
     check = sub.add_parser("check", help="Check one FutureTrace.")
     check.add_argument("--trace", required=True)
     check.add_argument("--pretty", action="store_true")
+
+    capture = sub.add_parser("capture-command", help="Run a command and emit a local TestRunEnvelope.")
+    capture.add_argument("--step", required=True)
+    capture.add_argument("--tree-hash", required=True)
+    capture.add_argument("--observed-sequence", type=int, default=1)
+    capture.add_argument("run_command", nargs=argparse.REMAINDER)
 
     args = parser.parse_args(argv)
 
@@ -63,6 +70,22 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(json.dumps(result, indent=2, sort_keys=True))
         return 0 if result["status"] == trace.get("expectedStatus", result["status"]) else 1
+
+    if args.command == "capture-command":
+        command = args.run_command
+        if command and command[0] == "--":
+            command = command[1:]
+        if not command:
+            print("capture-command requires a command after --", flush=True)
+            return 2
+        envelope = capture_command(
+            step_id=args.step,
+            tree_hash=args.tree_hash,
+            command=command,
+            observed_sequence=args.observed_sequence,
+        )
+        print(json.dumps(envelope, indent=2, sort_keys=True))
+        return 0 if envelope["fields"]["exitCode"] == 0 else envelope["fields"]["exitCode"]
 
     return 2
 
