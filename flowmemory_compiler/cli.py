@@ -16,6 +16,7 @@ from .capture import capture_command
 from .checker import check_trace
 from .claim_gate import scan_claims
 from .compiler import compile_plan, compile_trace
+from .evidence_schema import evidence_schema_report
 from .flowbond import demo_cases as flowbond_demo_cases
 from .policycards import demo_policy_card, public_policy_view
 from .private_compute import run_private_compute_demo
@@ -86,6 +87,10 @@ def main(argv: list[str] | None = None) -> int:
     private_compute = sub.add_parser("private-compute-demo", help="Run local private memory computation demo.")
     private_compute.add_argument("--pretty", action="store_true")
     private_compute.add_argument("--json", action="store_true")
+
+    evidence_schema = sub.add_parser("evidence-schema", help="Print warranted-agent evidence envelope specs.")
+    evidence_schema.add_argument("--pretty", action="store_true")
+    evidence_schema.add_argument("--json", action="store_true")
 
     transcript = sub.add_parser("release-transcript", help="Print canonical package transcript.")
     transcript.add_argument("--pretty", action="store_true")
@@ -213,6 +218,14 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(demo_result, indent=2, sort_keys=True))
         else:
             _print_private_compute(demo_result)
+        return 0
+
+    if args.command == "evidence-schema":
+        report = evidence_schema_report()
+        if args.json:
+            print(json.dumps(report, indent=2, sort_keys=True))
+        else:
+            _print_evidence_schema(report)
         return 0
 
     if args.command == "release-transcript":
@@ -476,6 +489,24 @@ def _print_private_compute(result: dict[str, Any]) -> None:
     print("  local only; no zero-knowledge, TEE, full privacy, or production private compute.")
 
 
+def _print_evidence_schema(result: dict[str, Any]) -> None:
+    print("FlowMemory Evidence Schema")
+    print()
+    for spec in result["envelopes"]:
+        print(spec["envelopeType"])
+        print(f"  {spec['purpose']}")
+        for field in spec["fields"]:
+            details = [field["kind"]]
+            if field["requiredValue"] is not None:
+                details.append(f"required={field['requiredValue']}")
+            if field["prefix"] is not None:
+                details.append(f"prefix={field['prefix']}")
+            print(f"  - {field['name']}: {', '.join(details)}")
+    print()
+    print("Result:")
+    print("  Evidence envelopes are named contracts with local field checks, not arbitrary receipt labels.")
+
+
 def _print_release_transcript(result: dict[str, Any]) -> None:
     print("FlowMemory Warranted Agents Release Transcript")
     print()
@@ -496,6 +527,10 @@ def _print_release_transcript(result: dict[str, Any]) -> None:
     print("AgentRuntime:")
     print(f"  runs:          {result['agentRuntime']['runCount']}")
     print(f"  finalStatuses: {', '.join(result['agentRuntime']['finalStatuses'])}")
+    print()
+    print("EvidenceSchema:")
+    print(f"  envelopeCount: {result['evidenceSchema']['envelopeCount']}")
+    print(f"  envelopeTypes: {', '.join(result['evidenceSchema']['envelopeTypes'])}")
     print()
     print("BondLedger:")
     print(f"  events: {', '.join(result['bondLedger']['events'])}")

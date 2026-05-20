@@ -12,7 +12,8 @@ from flowmemory_compiler.capture import capture_command
 from flowmemory_compiler.checker import check_trace
 from flowmemory_compiler.claim_gate import scan_claims
 from flowmemory_compiler.compiler import compile_trace
-from flowmemory_compiler.flowbond import demo_cases as flowbond_demo_cases
+from flowmemory_compiler.evidence_schema import evidence_schema_report, validate_evidence_envelope
+from flowmemory_compiler.flowbond import AgentWorkOutcome, EvidenceEnvelope, demo_cases as flowbond_demo_cases, settle_warranted_action
 from flowmemory_compiler.policycards import demo_policy_card, policy_hash, public_policy_view
 from flowmemory_compiler.private_compute import run_private_compute_demo
 from flowmemory_compiler.pulsepass import ScopedProofRequest, build_pulsepass, demo_passport, scoped_proof
@@ -115,6 +116,33 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertFalse(cases[2]["result"]["passed"])
         self.assertIn("PaymentReceiptEnvelope_wrong_obligation", cases[2]["result"]["violations"])
         self.assertTrue(cases[1]["result"]["flowPulse"]["pulseId"].startswith("sha256:"))
+
+    def test_evidence_schema_validates_local_envelopes(self):
+        self.assertEqual(validate_evidence_envelope("PaymentReceiptEnvelope", {"receiptStatus": "settled"}), [])
+        self.assertIn(
+            "field_artifactHash_bad_prefix",
+            validate_evidence_envelope("WorkDeliveryEnvelope", {"artifactHash": "artifact-ok"}),
+        )
+        report = evidence_schema_report()
+        self.assertEqual(len(report["envelopes"]), 4)
+
+    def test_flowbond_rejects_malformed_evidence_fields(self):
+        card = demo_policy_card()
+        outcome = AgentWorkOutcome(
+            action_id="action:bad-evidence-schema",
+            spent_units=10_00,
+            completed_at=1_800_000_000,
+            tx_hash="0x" + "88" * 32,
+            evidence=(
+                EvidenceEnvelope("PaymentReceiptEnvelope", "local:1", card.obligation_id, {"receiptStatus": "settled"}),
+                EvidenceEnvelope("WorkDeliveryEnvelope", "local:2", card.obligation_id, {"artifactHash": "artifact-ok"}),
+                EvidenceEnvelope("AcceptanceEnvelope", "local:3", card.obligation_id, {"accepted": True}),
+                EvidenceEnvelope("FlowPulseReceiptEnvelope", "local:4", card.obligation_id, {"pulseObserved": True}),
+            ),
+        )
+        result = settle_warranted_action(card, outcome)
+        self.assertFalse(result["passed"])
+        self.assertIn("WorkDeliveryEnvelope_field_artifactHash_bad_prefix", result["violations"])
 
     def test_policycard_public_view_hides_private_fields(self):
         card = demo_policy_card()

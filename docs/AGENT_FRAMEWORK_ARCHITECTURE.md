@@ -13,6 +13,7 @@ AgentManifest
   -> AgentProposal
   -> AgentRegistry
   -> AgentRuntime
+  -> EvidenceSchema
   -> FlowBond
   -> BondLedger
   -> FlowPulse
@@ -123,7 +124,20 @@ If the agent closes the obligation, the runtime ends in `WARRANTY_RELEASED`.
 
 If the agent takes payment without the required delivery path, the runtime ends in `USER_PAID_FROM_BOND`.
 
-## Layer 7: FlowBond
+## Layer 7: EvidenceSchema
+
+The `EvidenceSchema` is the local contract for receipt shape.
+
+It defines the fields required by:
+
+- `PaymentReceiptEnvelope`;
+- `WorkDeliveryEnvelope`;
+- `AcceptanceEnvelope`;
+- `FlowPulseReceiptEnvelope`.
+
+This keeps the framework from treating arbitrary labels as evidence.
+
+## Layer 8: FlowBond
 
 FlowBond settles the warranty.
 
@@ -131,7 +145,7 @@ If the required evidence closes the obligation, the bond releases to the agent.
 
 If payment happened without delivery, acceptance, or the correct obligation link, the bond pays the user.
 
-## Layer 8: BondLedger
+## Layer 9: BondLedger
 
 The local `BondLedger` models the warranty accounting path:
 
@@ -142,7 +156,7 @@ The local `BondLedger` models the warranty accounting path:
 
 This layer is local accounting only. It does not claim custody, escrow, wallet execution, or production settlement.
 
-## Layer 9: FlowPulse
+## Layer 10: FlowPulse
 
 The FlowPulse is the memory artifact.
 
@@ -159,7 +173,7 @@ It records:
 
 The action is not the memory. The FlowPulse is the memory artifact.
 
-## Layer 10: PulsePass
+## Layer 11: PulsePass
 
 PulsePass is the user's private receipt passport.
 
@@ -181,7 +195,7 @@ It hides:
 - exact action history;
 - private obligation IDs.
 
-## Layer 11: PrivateCompute
+## Layer 12: PrivateCompute
 
 The local `PrivateCompute` layer runs scoped predicate programs over PulsePass.
 
@@ -215,6 +229,7 @@ python -m flowmemory_compiler.cli agent-framework-demo --pretty
 python -m flowmemory_compiler.cli agent-adapter-demo --pretty
 python -m flowmemory_compiler.cli agent-registry-demo --pretty
 python -m flowmemory_compiler.cli agent-runtime-demo --pretty
+python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli bond-ledger-demo --pretty
 python -m flowmemory_compiler.cli private-compute-demo --pretty
 ```

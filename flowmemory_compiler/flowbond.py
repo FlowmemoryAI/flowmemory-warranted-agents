@@ -12,6 +12,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
+from .evidence_schema import validate_evidence_envelope
 from .policycards import PolicyCard, demo_policy_card, policy_hash, public_policy_view
 
 
@@ -122,6 +123,8 @@ def _violations(policy: PolicyCard, outcome: AgentWorkOutcome) -> list[str]:
     for envelope in outcome.evidence:
         if envelope.obligation_id != policy.obligation_id:
             violations.append(f"{envelope.envelope_type}_wrong_obligation")
+        for schema_violation in validate_evidence_envelope(envelope.envelope_type, envelope.fields):
+            violations.append(f"{envelope.envelope_type}_{schema_violation}")
 
     acceptance = evidence_by_type.get("AcceptanceEnvelope")
     if acceptance and acceptance.fields.get("accepted") is not True:
@@ -188,4 +191,3 @@ def _hash_value(value: str) -> str:
 def _hash_dict(payload: dict[str, Any]) -> str:
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
-

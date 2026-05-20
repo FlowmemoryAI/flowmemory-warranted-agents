@@ -4,7 +4,7 @@ This document is for a developer reviewing FlowMemory Warranted Agents as an arc
 
 ## One Sentence
 
-FlowMemory Warranted Agents turns an agent promise into a deterministic machine history: manifest, request, policy, proposal, bond, action evidence, FlowPulse settlement, private receipt proof, and conformance checks.
+FlowMemory Warranted Agents turns an agent promise into a deterministic machine history: manifest, request, policy, proposal, registry match, runtime phases, evidence schema checks, bond settlement, FlowPulse memory, private receipt proof, and conformance checks.
 
 ## Plain English
 
@@ -99,6 +99,7 @@ Code:
 - `flowmemory_compiler/agent_adapter.py`
 - `flowmemory_compiler/agent_registry.py`
 - `flowmemory_compiler/agent_runtime.py`
+- `flowmemory_compiler/evidence_schema.py`
 - `flowmemory_compiler/flowbond.py`
 - `flowmemory_compiler/pulsepass.py`
 - `flowmemory_compiler/private_compute.py`
@@ -109,6 +110,7 @@ Docs:
 - `docs/AGENT_FRAMEWORK_ARCHITECTURE.md`
 - `docs/AGENT_RUNTIME.md`
 - `docs/AGENT_REGISTRY.md`
+- `docs/EVIDENCE_SCHEMA.md`
 - `docs/CLAIM_GATE.md`
 - `docs/RELEASE_TRANSCRIPT.md`
 
@@ -122,6 +124,7 @@ Spec:
 python -m unittest discover -s tests -p "test_*.py"
 python -m flowmemory_compiler.cli agent-registry-demo --pretty
 python -m flowmemory_compiler.cli agent-runtime-demo --pretty
+python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
 python -m flowmemory_compiler.cli claim-gate --pretty
 ```

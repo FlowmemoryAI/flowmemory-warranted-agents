@@ -11,6 +11,7 @@ from .agent_registry import run_registry_demo
 from .agent_runtime import run_runtime_demo
 from .bond_ledger import run_bond_ledger_demo
 from .checker import check_trace
+from .evidence_schema import evidence_schema_report
 from .flowbond import demo_cases as flowbond_demo_cases
 from .policycards import demo_policy_card, public_policy_view
 from .private_compute import run_private_compute_demo
@@ -26,6 +27,7 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
     bond_ledger = run_bond_ledger_demo()
     registry = run_registry_demo()
     runtime = run_runtime_demo()
+    evidence_schema = evidence_schema_report()
     flowcompiler_results = [check_trace(case) for case in flowcompiler_cases]
 
     valid = [item for item in flowcompiler_results if item["caseId"].startswith("FC-OK")]
@@ -41,6 +43,7 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
             "AgentProposal",
             "AgentRegistry",
             "AgentRuntime",
+            "EvidenceSchema",
             "FlowBond",
             "BondLedger",
             "FlowPulse",
@@ -53,6 +56,10 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
         "agentFramework": _framework_summary(framework),
         "agentRegistry": _registry_summary(registry),
         "agentRuntime": _runtime_summary(runtime),
+        "evidenceSchema": {
+            "envelopeCount": len(evidence_schema["envelopes"]),
+            "envelopeTypes": [item["envelopeType"] for item in evidence_schema["envelopes"]],
+        },
         "flowBond": _flowbond_summary(flowbond_cases),
         "bondLedger": _bond_ledger_summary(bond_ledger),
         "pulsePass": {

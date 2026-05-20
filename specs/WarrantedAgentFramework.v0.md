@@ -71,6 +71,17 @@ Required phases:
 - `flowbond_settled`
 - `private_proof_ready`
 
+### EvidenceSchema
+
+Local field contract for evidence envelopes.
+
+Defined envelopes:
+
+- `PaymentReceiptEnvelope`
+- `WorkDeliveryEnvelope`
+- `AcceptanceEnvelope`
+- `FlowPulseReceiptEnvelope`
+
 ### FlowBondSettlement
 
 Settlement result after evidence is evaluated.
@@ -89,6 +100,7 @@ PolicyCard is derived.
 AgentProposal commits bond to policy hash.
 AgentRegistry confirms the agent is warrantable for the request.
 AgentRuntime records the machine history.
+EvidenceSchema checks envelope fields.
 Action emits evidence envelopes.
 FlowBond settles pass/fail.
 BondLedger records local lock/release/pay accounting.

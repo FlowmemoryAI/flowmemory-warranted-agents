@@ -25,6 +25,7 @@ jobs:
           python -m flowmemory_compiler.cli agent-runtime-demo --pretty
           python -m flowmemory_compiler.cli bond-ledger-demo --pretty
           python -m flowmemory_compiler.cli private-compute-demo --pretty
+          python -m flowmemory_compiler.cli evidence-schema --pretty
           python -m flowmemory_compiler.cli release-transcript --pretty
           python -m flowmemory_compiler.cli claim-gate --pretty
           python -m flowmemory_compiler.cli demo --pretty

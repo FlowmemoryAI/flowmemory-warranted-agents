@@ -19,6 +19,7 @@ Use this order:
 python -m flowmemory_compiler.cli release-transcript --pretty
 python -m flowmemory_compiler.cli agent-runtime-demo --pretty
 python -m flowmemory_compiler.cli agent-registry-demo --pretty
+python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli demo --pretty
 ```
 
@@ -28,7 +29,8 @@ The story is:
 1. Here is the full stack.
 2. Here is the runtime history.
 3. Here is warranty-based discovery.
-4. Here are impossible histories rejected.
+4. Here are the evidence contracts.
+5. Here are impossible histories rejected.
 ```
 
 ## Public Positioning
@@ -60,6 +62,7 @@ Safe:
 - FlowBond models bond-backed pass/fail settlement;
 - AgentRegistry filters agents by warranty evidence and bond capacity;
 - AgentRuntime records the state machine from quote to private proof;
+- EvidenceSchema checks required local fields for evidence envelopes;
 - PulsePass exposes scoped proofs without raw receipt history;
 - FlowCompiler rejects impossible machine histories in the bundled cases.
 

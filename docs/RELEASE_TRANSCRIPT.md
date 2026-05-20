@@ -10,6 +10,7 @@ It summarizes:
 - AgentProposal;
 - AgentRegistry;
 - AgentRuntime;
+- EvidenceSchema;
 - FlowBond;
 - BondLedger;
 - FlowPulse;
@@ -43,6 +44,10 @@ AgentRegistry:
 AgentRuntime:
   runs:          2
   finalStatuses: WARRANTY_RELEASED, USER_PAID_FROM_BOND
+
+EvidenceSchema:
+  envelopeCount: 4
+  envelopeTypes: PaymentReceiptEnvelope, WorkDeliveryEnvelope, AcceptanceEnvelope, FlowPulseReceiptEnvelope
 
 FlowCompiler:
   valid accepted:                 3/3

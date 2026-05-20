@@ -5,7 +5,7 @@ Generic agents make claims. FlowMemory agents can leave warranted receipts.
 FlowMemory Warranted Agents is a local public proof for a new agent primitive:
 
 ```text
-AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> AgentRegistry -> AgentRuntime -> FlowBond -> FlowPulse -> PulsePass -> ScopedProof
+AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> AgentRegistry -> AgentRuntime -> EvidenceSchema -> FlowBond -> FlowPulse -> PulsePass -> ScopedProof
 ```
 
 The user defines the promise. The agent bonds the promise. The action emits receipt-backed memory. The user privately carries proof of what happened.
@@ -101,6 +101,17 @@ manifest loaded -> policy quoted -> bond locked -> action executed -> FlowBond s
 
 This turns the whole framework into a machine history that can be inspected, tested, and rejected when it violates the promised evidence path.
 
+### EvidenceSchema
+
+Named evidence contracts for warranted receipts.
+
+Evidence is not just a label. The local schema checks required fields for:
+
+- `PaymentReceiptEnvelope`
+- `WorkDeliveryEnvelope`
+- `AcceptanceEnvelope`
+- `FlowPulseReceiptEnvelope`
+
 ### FlowPulse
 
 The receipt-backed memory artifact.
@@ -139,6 +150,7 @@ python -m flowmemory_compiler.cli private-compute-demo --pretty
 python -m flowmemory_compiler.cli agent-adapter-demo --pretty
 python -m flowmemory_compiler.cli agent-registry-demo --pretty
 python -m flowmemory_compiler.cli agent-runtime-demo --pretty
+python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
 python -m flowmemory_compiler.cli claim-gate --pretty
 ```
@@ -157,6 +169,9 @@ AgentRegistry:
 
 AgentRuntime:
   one deterministic machine history from quote to private proof
+
+EvidenceSchema:
+  named envelopes with required local field checks
 
 PolicyCard:
   portable, hashable, bondable promise
