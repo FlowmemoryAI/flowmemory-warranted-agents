@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0
+
+Outcome-settled AI and PulseRouter launch slice.
+
+- Added PulseRouter local router for provider selection by expected successful outcome, not raw token price.
+- Added ComputePulse, ToolCallPulse, ActionPulse, FlowPulseLink, OutcomePulse, ProviderQuote, OutcomePolicy, and RouteScore local data model.
+- Added `pulserouter-demo` and `pulserouter-adversary` CLI commands.
+- Added 26-case adversarial suite for route manipulation, privacy drift, FlowPulse link drift, settlement drift, cost-accounting drift, policy drift, unconfirmed FlowPulse evidence, and raw model-content leakage.
+- Added Outcome-Settled AI and PulseRouter architecture docs plus `PulseRouter.v0` spec.
+- Added PulseRouter checks to release transcript, launch packet, CI demos, and local tests.
+
 ## 0.2.1
 
 Launch packet and adapter conformance hardening.

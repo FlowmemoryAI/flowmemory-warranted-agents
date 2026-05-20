@@ -5,7 +5,7 @@ Generic agents make claims. FlowMemory agents can leave warranted receipts.
 FlowMemory Warranted Agents is a local public proof for a new agent primitive:
 
 ```text
-AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> AgentRegistry -> AgentRuntime -> EvidenceSchema -> FlowBond -> FlowPulse -> PulsePass -> ScopedProof
+AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> AgentRegistry -> AgentRuntime -> EvidenceSchema -> FlowBond -> FlowPulse -> PulsePass -> PulseRouter -> OutcomePulse -> ScopedProof
 ```
 
 The user defines the promise. The agent bonds the promise. The action emits receipt-backed memory. The user privately carries proof of what happened.
@@ -39,6 +39,8 @@ FlowBond gives the agent money on the line.
 PulsePass gives the user portable private proof.
 
 PolicyCards let the user's rules travel between agents.
+
+PulseRouter routes providers by successful outcomes, not raw token price.
 
 ## Product Stack
 
@@ -138,6 +140,21 @@ It does not expose the raw receipt history.
 
 FlowCompiler is the conformance engine underneath the stack. It turns proposed actions into required evidence envelopes and rejects futures that cannot become legal machine histories.
 
+### PulseRouter
+
+PulseRouter is the launch MVP for outcome-settled AI.
+
+It compares model/provider routes against a PolicyCard-like user policy, emits
+`ComputePulse`, `ToolCallPulse`, `ActionPulse`, reader-derived `FlowPulse` link,
+and `OutcomePulse`, then proves the selected route is the cheapest successful
+route rather than the cheapest raw inference route.
+
+The public claim is:
+
+```text
+The cheapest model is not the cheapest successful route.
+```
+
 ## Demos
 
 Run the warranted-agent stack:
@@ -155,6 +172,8 @@ python -m flowmemory_compiler.cli agent-registry-demo --pretty
 python -m flowmemory_compiler.cli agent-runtime-demo --pretty
 python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
+python -m flowmemory_compiler.cli pulserouter-demo --pretty
+python -m flowmemory_compiler.cli pulserouter-adversary --pretty
 python -m flowmemory_compiler.cli claim-gate --pretty
 python -m flowmemory_compiler.cli launch-packet --pretty
 python -m flowmemory_compiler.cli production-readiness --pretty
@@ -197,6 +216,9 @@ BondLedger:
 
 PrivateCompute:
   scoped predicates over PulsePass without exposing raw receipts
+
+PulseRouter:
+  routes three providers by expected successful outcome, emits pulses, links to FlowPulse, and catches 26 adversarial manipulations
 
 ReleaseTranscript:
   one canonical offline object that summarizes the full framework
@@ -281,6 +303,9 @@ Start here for review:
 - `docs/THREAT_MODEL.md`
 - `docs/CLAIM_BOUNDARIES.md`
 - `docs/MARKETING_POSITIONING.md`
+- `docs/OUTCOME_SETTLED_AI.md`
+- `docs/PULSEROUTER_ARCHITECTURE.md`
+- `docs/BUILD_TEST_VERIFY_LOOP.md`
 - `docs/AGENT_RUNTIME.md`
 - `docs/RUNTIME_STATE_MACHINE.md`
 - `docs/AGENT_REGISTRY.md`
@@ -297,6 +322,7 @@ Start here for review:
 - `specs/RuntimeStateMachine.v0.md`
 - `specs/EvidenceSchemas.v0.md`
 - `specs/RuntimeTelemetry.v0.md`
+- `specs/PulseRouter.v0.md`
 - `examples/warranted_agents/README.md`
 
 ## Non-Claims
@@ -316,6 +342,9 @@ This v0 does not claim:
 - full privacy;
 - zero-knowledge privacy;
 - production bond adjudication;
+- production provider marketplace;
+- production wallet settlement;
+- production x402 service;
 - production verifier readiness.
 
 The local `capture-command` helper records command exit code and output hashes. It still does not prove code correctness, semantic truth, or production provenance.
@@ -336,4 +365,12 @@ The user owns the rule. The agent bonds the promise. The FlowPulse carries the m
 
 ```text
 Actions can look valid to ordinary rails while the machine history behind them is impossible.
+```
+
+```text
+UsePod finds cheap compute. FlowMemory finds useful compute.
+```
+
+```text
+Outcome-settled AI: agents paid by successful work, not tokens.
 ```

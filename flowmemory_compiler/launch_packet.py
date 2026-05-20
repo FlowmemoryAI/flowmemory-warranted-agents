@@ -9,12 +9,15 @@ from typing import Any
 
 from . import __version__
 from .claim_gate import scan_claims
+from .outcome_router import run_pulserouter_adversary_suite, run_pulserouter_demo
 from .release_transcript import build_release_transcript
 
 
 def build_launch_packet(flowcompiler_cases: list[dict[str, Any]], root: Path) -> dict[str, Any]:
     transcript = build_release_transcript(flowcompiler_cases)
     claims = scan_claims(root)
+    pulserouter = run_pulserouter_demo()
+    pulserouter_adversary = run_pulserouter_adversary_suite()
     readiness_checks = [
         {
             "check": "claim_gate_passed",
@@ -36,6 +39,16 @@ def build_launch_packet(flowcompiler_cases: list[dict[str, Any]], root: Path) ->
             "passed": transcript["flowCompiler"]["escapedImpossibleHistories"] == 0,
             "detail": f"rejected={transcript['flowCompiler']['invalidRejected']}/{transcript['flowCompiler']['invalidTotal']}",
         },
+        {
+            "check": "pulserouter_demo_has_no_validation_faults",
+            "passed": not pulserouter["validationFaults"],
+            "detail": f"selected={pulserouter['selectedProviderId']}",
+        },
+        {
+            "check": "pulserouter_adversary_suite_passed",
+            "passed": pulserouter_adversary["passed"],
+            "detail": f"caught={pulserouter_adversary['caught']}/{pulserouter_adversary['total']}",
+        },
     ]
     packet = {
         "schema": "flowmemory.warranted_agents_launch_packet.v0",
@@ -51,6 +64,8 @@ def build_launch_packet(flowcompiler_cases: list[dict[str, Any]], root: Path) ->
             "python -m unittest",
             "python -m flowmemory_compiler.cli release-transcript --pretty",
             "python -m flowmemory_compiler.cli adapter-conformance-demo --pretty",
+            "python -m flowmemory_compiler.cli pulserouter-demo --pretty",
+            "python -m flowmemory_compiler.cli pulserouter-adversary --pretty",
             "python -m flowmemory_compiler.cli claim-gate --pretty",
         ],
         "notClaims": transcript["notClaims"],

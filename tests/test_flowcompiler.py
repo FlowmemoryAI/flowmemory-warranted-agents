@@ -16,6 +16,14 @@ from flowmemory_compiler.compiler import compile_trace
 from flowmemory_compiler.evidence_schema import evidence_schema_report, validate_evidence_envelope
 from flowmemory_compiler.flowbond import AgentWorkOutcome, EvidenceEnvelope, demo_cases as flowbond_demo_cases, settle_warranted_action
 from flowmemory_compiler.launch_packet import build_launch_packet
+from flowmemory_compiler.outcome_router import (
+    demo_policy as pulserouter_demo_policy,
+    demo_quotes as pulserouter_demo_quotes,
+    route_score,
+    run_pulserouter_adversary_suite,
+    run_pulserouter_demo,
+    validate_outcome_report,
+)
 from flowmemory_compiler.policycards import demo_policy_card, policy_hash, public_policy_view
 from flowmemory_compiler.private_compute import run_private_compute_demo
 from flowmemory_compiler.production_readiness import PRODUCTION_GATES, build_production_readiness_packet
@@ -200,14 +208,49 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertTrue(all("raw_receipts" in item["hidden"] for item in result["programResults"]))
         self.assertTrue(result["programResults"][0]["passed"])
 
+    def test_pulserouter_scores_useful_outcome_above_raw_price(self):
+        policy = pulserouter_demo_policy()
+        scores = [route_score(policy, quote) for quote in pulserouter_demo_quotes()]
+        selected = max(scores, key=lambda item: item["scoreUnits"])
+        cheapest = min(pulserouter_demo_quotes(), key=lambda quote: quote.quoted_price_units)
+        self.assertEqual(selected["providerId"], "provider:private-bonded")
+        self.assertNotEqual(selected["providerId"], cheapest.provider_id)
+        self.assertTrue(selected["eligible"])
+
+    def test_pulserouter_demo_links_compute_action_flowpulse_and_outcome(self):
+        result = run_pulserouter_demo()
+        self.assertEqual(result["schema"], "flowmemory.pulserouter_demo.v0")
+        self.assertEqual(result["selectedProviderId"], "provider:private-bonded")
+        self.assertEqual(result["validationFaults"], [])
+        self.assertTrue(result["outcomePulse"]["passed"])
+        self.assertEqual(result["outcomePulse"]["settlement"], "PAY_PROVIDER_RELEASE_BOND")
+        self.assertEqual(result["flowPulseLink"]["source"], "reader_derived")
+        self.assertTrue(result["portableUserMemory"]["earned"])
+        self.assertNotIn("raw_prompt", result["computePulses"][0])
+
+    def test_pulserouter_adversary_suite_catches_all_cases(self):
+        result = run_pulserouter_adversary_suite()
+        self.assertEqual(result["schema"], "flowmemory.pulserouter_adversary_suite.v0")
+        self.assertGreaterEqual(result["total"], 20)
+        self.assertEqual(result["caught"], result["total"])
+        self.assertTrue(result["passed"])
+
+    def test_pulserouter_validation_rejects_flowpulse_commitment_drift(self):
+        result = run_pulserouter_demo()
+        result["flowPulseLink"]["commitment"] = "sha256:wrong"
+        self.assertIn("flowpulse_commitment_mismatch", validate_outcome_report(result))
+
     def test_release_transcript_summarizes_all_layers(self):
         result = build_release_transcript(CASES)
         self.assertEqual(result["schema"], "flowmemory.warranted_agents_release_transcript.v0")
         self.assertIn("AgentManifest", result["stack"])
         self.assertIn("PrivateCompute", result["stack"])
+        self.assertIn("PulseRouter", result["stack"])
         self.assertTrue(result["transcriptHash"].startswith("sha256:"))
         self.assertEqual(result["flowBond"]["releasedToAgent"], 1)
         self.assertEqual(result["flowBond"]["paidToUser"], 2)
+        self.assertEqual(result["pulseRouter"]["selectedProviderId"], "provider:private-bonded")
+        self.assertEqual(result["pulseRouter"]["adversaryCaught"], result["pulseRouter"]["adversaryTotal"])
         self.assertEqual(result["flowCompiler"]["validAccepted"], 3)
         self.assertEqual(result["flowCompiler"]["invalidRejected"], 8)
         self.assertEqual(result["flowCompiler"]["escapedImpossibleHistories"], 0)
@@ -217,7 +260,7 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(result["schema"], "flowmemory.warranted_agents_launch_packet.v0")
         self.assertTrue(result["readiness"]["passed"])
         self.assertTrue(result["packetHash"].startswith("sha256:"))
-        self.assertEqual(result["version"], "0.2.1")
+        self.assertEqual(result["version"], "0.3.0")
 
     def test_production_readiness_packet_marks_external_gates_blocking(self):
         result = build_production_readiness_packet(CASES, ROOT)

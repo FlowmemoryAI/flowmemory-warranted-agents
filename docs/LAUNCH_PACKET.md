@@ -17,6 +17,8 @@ It summarizes:
 - adapter conformance status;
 - runtime success/failure coverage;
 - bundled impossible-history rejection status;
+- PulseRouter outcome-routing validation;
+- PulseRouter adversarial validation;
 - reviewer commands.
 
 Expected shape:
@@ -31,6 +33,8 @@ Checks:
   adapter_conformance_passed                             PASS
   runtime_has_success_and_failure_paths                  PASS
   flowcompiler_rejects_all_bundled_impossible_histories  PASS
+  pulserouter_demo_has_no_validation_faults              PASS
+  pulserouter_adversary_suite_passed                     PASS
 ```
 
 ## Why This Matters

@@ -20,6 +20,7 @@ from .compiler import compile_plan, compile_trace
 from .evidence_schema import evidence_schema_report
 from .flowbond import demo_cases as flowbond_demo_cases
 from .launch_packet import build_launch_packet
+from .outcome_router import run_pulserouter_adversary_suite, run_pulserouter_demo
 from .policycards import demo_policy_card, public_policy_view
 from .private_compute import run_private_compute_demo
 from .production_readiness import build_production_readiness_packet
@@ -116,6 +117,14 @@ def main(argv: list[str] | None = None) -> int:
     production_readiness.add_argument("--json", action="store_true")
     production_readiness.add_argument("--satisfied-gate", action="append", default=[])
     production_readiness.add_argument("--require-production-ready", action="store_true")
+
+    pulserouter = sub.add_parser("pulserouter-demo", help="Run the outcome-settled PulseRouter demo.")
+    pulserouter.add_argument("--pretty", action="store_true")
+    pulserouter.add_argument("--json", action="store_true")
+
+    pulserouter_adversary = sub.add_parser("pulserouter-adversary", help="Run PulseRouter adversarial validation cases.")
+    pulserouter_adversary.add_argument("--pretty", action="store_true")
+    pulserouter_adversary.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -289,6 +298,22 @@ def main(argv: list[str] | None = None) -> int:
         if args.require_production_ready:
             return 0 if result["productionReady"] else 1
         return 0 if result["localArchitectureReady"] else 1
+
+    if args.command == "pulserouter-demo":
+        result = run_pulserouter_demo()
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            _print_pulserouter(result)
+        return 0 if not result["validationFaults"] else 1
+
+    if args.command == "pulserouter-adversary":
+        result = run_pulserouter_adversary_suite()
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            _print_pulserouter_adversary(result)
+        return 0 if result["passed"] else 1
 
     return 2
 
@@ -607,6 +632,12 @@ def _print_release_transcript(result: dict[str, Any]) -> None:
         status = "PASS" if program["passed"] else "FAIL"
         print(f"  {program['programId']:<38} {status} {program['transcriptHash']}")
     print()
+    print("PulseRouter:")
+    print(f"  selectedProvider: {result['pulseRouter']['selectedProviderId']}")
+    print(f"  effectiveCostPerSuccessfulOutcomeUnits: {result['pulseRouter']['effectiveCostPerSuccessfulOutcomeUnits']}")
+    print(f"  adversaryCaught: {result['pulseRouter']['adversaryCaught']}/{result['pulseRouter']['adversaryTotal']}")
+    print(f"  portableUserMemory: {result['pulseRouter']['portableUserMemoryPredicate']}")
+    print()
     print("FlowCompiler:")
     compiler = result["flowCompiler"]
     print(f"  valid accepted:                 {compiler['validAccepted']}/{compiler['validTotal']}")
@@ -667,6 +698,55 @@ def _print_production_readiness(result: dict[str, Any]) -> None:
     print()
     print("Next milestone:")
     print(f"  {result['nextRequiredMilestone']}")
+
+
+def _print_pulserouter(result: dict[str, Any]) -> None:
+    print("FlowMemory PulseRouter")
+    print()
+    print("Category:")
+    print(f"  {result['categoryClaim']}")
+    print()
+    print("Route scores:")
+    for score in result["routeScores"]:
+        status = "ELIGIBLE" if score["eligible"] else "BLOCKED"
+        print(f"  {score['providerId']:<30} {status:<8} score={score['scoreUnits']} price={score['quotedPriceUnits']}")
+        if score["reasons"]:
+            print(f"    reasons: {', '.join(score['reasons'])}")
+    print()
+    print(f"Selected route: {result['selectedProviderId']}")
+    print(f"ComputePulse:   {result['outcomePulse']['computePulseId']}")
+    print(f"ActionPulse:    {result['outcomePulse']['actionPulseId']}")
+    print(f"FlowPulse:      {result['outcomePulse']['flowPulseId']}")
+    print(f"OutcomePulse:   {result['outcomePulse']['pulseId']}")
+    print()
+    print("Settlement:")
+    print(f"  {result['outcomePulse']['settlement']}")
+    print(f"  providerPaidUnits: {result['outcomePulse']['providerPaidUnits']}")
+    print(f"  agentRewardUnits:  {result['outcomePulse']['agentRewardUnits']}")
+    print(f"  effectiveCostPerSuccessfulOutcomeUnits: {result['effectiveCostPerSuccessfulOutcomeUnits']}")
+    print()
+    print("Portable user memory:")
+    print(f"  predicate: {result['portableUserMemory']['pulsePassPredicate']}")
+    print(f"  earned:    {result['portableUserMemory']['earned']}")
+    print(f"  hides:     {', '.join(result['portableUserMemory']['hides'])}")
+    print()
+    print("Result:")
+    print("  The cheapest model is not the cheapest successful route.")
+    print()
+    print("Non-claims:")
+    print("  " + ", ".join(result["notClaims"]))
+
+
+def _print_pulserouter_adversary(result: dict[str, Any]) -> None:
+    print("FlowMemory PulseRouter Adversary Suite")
+    print()
+    for item in result["results"]:
+        status = "PASS" if item["caught"] else "FAIL"
+        print(f"  {item['caseId']:<12} {item['label']:<42} {status} {item['expectedFault']}")
+    print()
+    print(f"Caught: {result['caught']}/{result['total']}")
+    print("Result:")
+    print("  PulseRouter rejects manipulated outcome histories before they become portable memory.")
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:

@@ -4,7 +4,7 @@ This document is for a developer reviewing FlowMemory Warranted Agents as an arc
 
 ## One Sentence
 
-FlowMemory Warranted Agents turns an agent promise into a deterministic machine history: manifest, request, policy, proposal, registry match, runtime phases, evidence schema checks, bond settlement, FlowPulse memory, private receipt proof, and conformance checks.
+FlowMemory Warranted Agents turns an agent promise into a deterministic machine history: manifest, request, policy, proposal, registry match, runtime phases, evidence schema checks, bond settlement, FlowPulse memory, PulseRouter outcome routing, private receipt proof, and conformance checks.
 
 ## Plain English
 
@@ -22,6 +22,7 @@ Here is the evidence I must produce.
 Here is the bond behind the promise.
 Here is the memory receipt after the action.
 Here is a private proof the user can carry later.
+Here is why the selected provider was useful, not just cheap.
 ```
 
 That is the framework.
@@ -104,6 +105,7 @@ Code:
 - `flowmemory_compiler/flowbond.py`
 - `flowmemory_compiler/pulsepass.py`
 - `flowmemory_compiler/private_compute.py`
+- `flowmemory_compiler/outcome_router.py`
 - `flowmemory_compiler/claim_gate.py`
 - `flowmemory_compiler/production_readiness.py`
 
@@ -117,6 +119,8 @@ Docs:
 - `docs/EVIDENCE_SCHEMA.md`
 - `docs/CLAIM_GATE.md`
 - `docs/RELEASE_TRANSCRIPT.md`
+- `docs/OUTCOME_SETTLED_AI.md`
+- `docs/PULSEROUTER_ARCHITECTURE.md`
 - `docs/PRODUCTION_READINESS_ARCHITECTURE.md`
 - `docs/PRODUCTION_GATE_CHECKLIST.md`
 - `docs/OPERATOR_RUNBOOK.md`
@@ -126,6 +130,7 @@ Docs:
 Spec:
 
 - `specs/WarrantedAgentFramework.v0.md`
+- `specs/PulseRouter.v0.md`
 
 ## Verification Commands
 
@@ -135,6 +140,8 @@ python -m flowmemory_compiler.cli agent-registry-demo --pretty
 python -m flowmemory_compiler.cli agent-runtime-demo --pretty
 python -m flowmemory_compiler.cli evidence-schema --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
+python -m flowmemory_compiler.cli pulserouter-demo --pretty
+python -m flowmemory_compiler.cli pulserouter-adversary --pretty
 python -m flowmemory_compiler.cli claim-gate --pretty
 python -m flowmemory_compiler.cli production-readiness --pretty
 ```
@@ -153,6 +160,12 @@ The point is narrower:
 
 ```text
 Make the agent promise machine-checkable before, during, and after execution.
+```
+
+PulseRouter adds the outcome layer:
+
+```text
+Route intelligence by receipt-backed successful outcomes, not raw token price.
 ```
 
 Production status:

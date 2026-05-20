@@ -14,6 +14,7 @@ from .bond_ledger import run_bond_ledger_demo
 from .checker import check_trace
 from .evidence_schema import evidence_schema_report
 from .flowbond import demo_cases as flowbond_demo_cases
+from .outcome_router import run_pulserouter_adversary_suite, run_pulserouter_demo
 from .policycards import demo_policy_card, public_policy_view
 from .private_compute import run_private_compute_demo
 from .pulsepass import demo_passport, demo_proofs
@@ -30,6 +31,8 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
     runtime = run_runtime_demo()
     adapter_conformance = run_adapter_conformance_demo()
     evidence_schema = evidence_schema_report()
+    pulserouter = run_pulserouter_demo()
+    pulserouter_adversary = run_pulserouter_adversary_suite()
     flowcompiler_results = [check_trace(case) for case in flowcompiler_cases]
 
     valid = [item for item in flowcompiler_results if item["caseId"].startswith("FC-OK")]
@@ -53,6 +56,8 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
             "PulsePass",
             "PrivateCompute",
             "ScopedProof",
+            "PulseRouter",
+            "OutcomePulse",
             "FlowCompiler",
         ],
         "policyCard": public_policy_view(demo_policy_card()),
@@ -87,6 +92,16 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
                 for item in private_compute["programResults"]
             ],
         },
+        "pulseRouter": {
+            "categoryClaim": pulserouter["categoryClaim"],
+            "selectedProviderId": pulserouter["selectedProviderId"],
+            "effectiveCostPerSuccessfulOutcomeUnits": pulserouter["effectiveCostPerSuccessfulOutcomeUnits"],
+            "validationFaults": pulserouter["validationFaults"],
+            "portableUserMemoryPredicate": pulserouter["portableUserMemory"]["pulsePassPredicate"],
+            "adversaryCaught": pulserouter_adversary["caught"],
+            "adversaryTotal": pulserouter_adversary["total"],
+            "adversaryPassed": pulserouter_adversary["passed"],
+        },
         "flowCompiler": {
             "validAccepted": sum(item["status"] == "ACCEPTED" for item in valid),
             "validTotal": len(valid),
@@ -107,6 +122,10 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
             "not_live_base_deployment",
             "not_production_verifier",
             "not_production_bond_adjudication",
+            "not_live_provider_marketplace",
+            "not_production_wallet",
+            "not_production_settlement",
+            "not_model_correctness",
         ],
     }
     transcript["transcriptHash"] = _hash_dict(transcript)
