@@ -18,6 +18,7 @@ class AgentMatch:
     missing_evidence: tuple[str, ...]
     requested_bond_units: int
     max_bond_units: int
+    warrantability_score: int
     reasons: tuple[str, ...]
 
 
@@ -37,7 +38,7 @@ class AgentRegistry:
 
     def match(self, request: WorkRequest) -> list[AgentMatch]:
         matches = [_match_manifest(manifest, request) for manifest in self._manifests.values()]
-        return sorted(matches, key=lambda item: (not item.eligible, item.display_name))
+        return sorted(matches, key=lambda item: (not item.eligible, -item.warrantability_score, item.display_name))
 
 
 def run_registry_demo() -> dict[str, Any]:
@@ -85,6 +86,7 @@ def match_to_public(match: AgentMatch) -> dict[str, Any]:
         "missingEvidence": list(match.missing_evidence),
         "requestedBondUnits": match.requested_bond_units,
         "maxBondUnits": match.max_bond_units,
+        "warrantabilityScore": match.warrantability_score,
         "reasons": list(match.reasons),
     }
 
@@ -104,6 +106,12 @@ def _match_manifest(manifest: AgentManifest, request: WorkRequest) -> AgentMatch
         reasons.append("unsupported_promise_type")
     if not reasons:
         reasons.append("eligible_for_warranted_quote")
+    score = _warrantability_score(
+        required_count=len(required),
+        matched_count=len(matched),
+        requested_bond_units=request.requested_bond_units,
+        max_bond_units=manifest.max_bond_units,
+    )
     return AgentMatch(
         agent_id=manifest.agent_id,
         display_name=manifest.display_name,
@@ -113,5 +121,24 @@ def _match_manifest(manifest: AgentManifest, request: WorkRequest) -> AgentMatch
         missing_evidence=missing,
         requested_bond_units=request.requested_bond_units,
         max_bond_units=manifest.max_bond_units,
+        warrantability_score=score,
         reasons=tuple(reasons),
     )
+
+
+def _warrantability_score(
+    *,
+    required_count: int,
+    matched_count: int,
+    requested_bond_units: int,
+    max_bond_units: int,
+) -> int:
+    if required_count == 0:
+        evidence_score = 70
+    else:
+        evidence_score = int(70 * (matched_count / required_count))
+    if requested_bond_units <= 0:
+        bond_score = 30
+    else:
+        bond_score = int(30 * min(max_bond_units / requested_bond_units, 1))
+    return min(100, evidence_score + bond_score)

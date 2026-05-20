@@ -103,6 +103,8 @@ It matches by:
 - requested bond amount;
 - promise type.
 
+It also computes a local `warrantabilityScore` from evidence fit and bond capacity.
+
 This is not a reputation marketplace. It is a warranty-eligibility filter.
 
 ## Layer 6: AgentRuntime

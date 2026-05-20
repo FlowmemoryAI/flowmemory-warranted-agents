@@ -18,6 +18,13 @@ The registry checks:
 
 If an agent cannot provide the evidence path or cannot support the requested bond, it is rejected before the user treats the agent as warrantable.
 
+The local registry also emits a `warrantabilityScore`.
+
+That score is not reputation. It is a deterministic fit score for this request:
+
+- evidence support;
+- bond capacity.
+
 ## Why This Matters
 
 Agent marketplaces can make every agent look available.
@@ -42,9 +49,9 @@ Expected shape:
 FlowMemory Warranted Agent Registry
 
 Matches:
-  FlowMemory Warranted Research Agent ELIGIBLE
+  FlowMemory Warranted Research Agent ELIGIBLE score=100
     reasons: eligible_for_warranted_quote
-  Cheap Claim Agent                 REJECTED
+  Cheap Claim Agent                 REJECTED score=29
     reasons: missing_required_evidence, bond_request_exceeds_manifest_limit
 ```
 

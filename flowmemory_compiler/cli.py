@@ -429,7 +429,7 @@ def _print_agent_registry(result: dict[str, Any]) -> None:
     print("Matches:")
     for match in result["matches"]:
         status = "ELIGIBLE" if match["eligible"] else "REJECTED"
-        print(f"  {match['displayName']:<32} {status}")
+        print(f"  {match['displayName']:<32} {status} score={match['warrantabilityScore']}")
         print(f"    reasons: {', '.join(match['reasons'])}")
         if match["missingEvidence"]:
             print(f"    missing: {', '.join(match['missingEvidence'])}")

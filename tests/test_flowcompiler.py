@@ -229,8 +229,10 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(result["schema"], "flowmemory.agent_registry_demo.v0")
         self.assertEqual(len(result["matches"]), 2)
         self.assertTrue(result["matches"][0]["eligible"])
+        self.assertEqual(result["matches"][0]["warrantabilityScore"], 100)
         self.assertEqual(result["matches"][0]["reasons"], ["eligible_for_warranted_quote"])
         self.assertFalse(result["matches"][1]["eligible"])
+        self.assertLess(result["matches"][1]["warrantabilityScore"], 100)
         self.assertIn("missing_required_evidence", result["matches"][1]["reasons"])
 
     def test_agent_runtime_runs_success_and_failure_histories(self):

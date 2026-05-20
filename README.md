@@ -91,6 +91,8 @@ Discovery for warranted agents.
 
 The registry does not rank generic vibes or profile copy. It checks whether an agent can actually support the required evidence and bond amount.
 
+It also emits a local `warrantabilityScore`: evidence fit plus bond capacity for this specific request.
+
 ### AgentRuntime
 
 The deterministic state machine for a warranted action:
