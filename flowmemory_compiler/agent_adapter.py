@@ -29,6 +29,9 @@ class WarrantedAgentAdapter(Protocol):
     def execute(self, policy: PolicyCard, *, mode: str) -> AgentWorkOutcome:
         ...
 
+    def settle(self, policy: PolicyCard, outcome: AgentWorkOutcome) -> dict[str, Any]:
+        ...
+
 
 class DemoWarrantedAgentAdapter:
     """Deterministic local adapter used by tests and demos."""
@@ -69,13 +72,16 @@ class DemoWarrantedAgentAdapter:
             )
         raise ValueError(f"unknown adapter execution mode: {mode}")
 
+    def settle(self, policy: PolicyCard, outcome: AgentWorkOutcome) -> dict[str, Any]:
+        return settle_warranted_action(policy, outcome)
+
 
 def run_adapter_demo() -> dict[str, Any]:
     adapter = DemoWarrantedAgentAdapter()
     request = demo_request()
     policy, proposal = adapter.quote(request)
-    success = settle_warranted_action(policy, adapter.execute(policy, mode="success"))
-    failure = settle_warranted_action(policy, adapter.execute(policy, mode="payment_without_delivery"))
+    success = adapter.settle(policy, adapter.execute(policy, mode="success"))
+    failure = adapter.settle(policy, adapter.execute(policy, mode="payment_without_delivery"))
     return {
         "schema": "flowmemory.agent_adapter_demo.v0",
         "manifest": adapter.manifest(),
@@ -98,4 +104,3 @@ def _envelope(envelope_type: str, obligation_id: str, fields: dict[str, Any]) ->
         obligation_id=obligation_id,
         fields=fields,
     )
-

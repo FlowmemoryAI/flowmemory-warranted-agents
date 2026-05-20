@@ -5,9 +5,12 @@ from pathlib import Path
 
 from flowmemory_compiler.agent_adapter import DemoWarrantedAgentAdapter, run_adapter_demo
 from flowmemory_compiler.agent_framework import demo_request, run_agent_framework_demo
+from flowmemory_compiler.agent_registry import run_registry_demo
+from flowmemory_compiler.agent_runtime import run_runtime_demo
 from flowmemory_compiler.bond_ledger import run_bond_ledger_demo
 from flowmemory_compiler.capture import capture_command
 from flowmemory_compiler.checker import check_trace
+from flowmemory_compiler.claim_gate import scan_claims
 from flowmemory_compiler.compiler import compile_trace
 from flowmemory_compiler.flowbond import demo_cases as flowbond_demo_cases
 from flowmemory_compiler.policycards import demo_policy_card, policy_hash, public_policy_view
@@ -192,6 +195,31 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(len(result["settlements"]), 2)
         self.assertTrue(result["settlements"][0]["passed"])
         self.assertFalse(result["settlements"][1]["passed"])
+
+    def test_agent_registry_matches_warranted_agent(self):
+        result = run_registry_demo()
+        self.assertEqual(result["schema"], "flowmemory.agent_registry_demo.v0")
+        self.assertEqual(len(result["matches"]), 2)
+        self.assertTrue(result["matches"][0]["eligible"])
+        self.assertEqual(result["matches"][0]["reasons"], ["eligible_for_warranted_quote"])
+        self.assertFalse(result["matches"][1]["eligible"])
+        self.assertIn("missing_required_evidence", result["matches"][1]["reasons"])
+
+    def test_agent_runtime_runs_success_and_failure_histories(self):
+        result = run_runtime_demo()
+        self.assertEqual(result["schema"], "flowmemory.warranted_agent_runtime_demo.v0")
+        self.assertEqual(result["summary"]["successFinalStatus"], "WARRANTY_RELEASED")
+        self.assertEqual(result["summary"]["failureFinalStatus"], "USER_PAID_FROM_BOND")
+        self.assertEqual(result["summary"]["timelineLength"], 6)
+        self.assertEqual(result["runs"][0]["settlement"]["settlement"], "RELEASE_BOND_TO_AGENT")
+        self.assertEqual(result["runs"][1]["settlement"]["settlement"], "PAY_BOND_TO_USER")
+        self.assertTrue(all(event["eventHash"].startswith("sha256:") for event in result["runs"][0]["timeline"]))
+
+    def test_claim_gate_passes_public_copy(self):
+        result = scan_claims(ROOT)
+        self.assertTrue(result["filesChecked"] > 0)
+        self.assertEqual(result["unguardedOverclaims"], [])
+        self.assertTrue(result["passed"])
 
 
 def _case(case_id):

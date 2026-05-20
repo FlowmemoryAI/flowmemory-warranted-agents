@@ -110,7 +110,7 @@ The user keeps the full policy and history in a local or encrypted FlowMemory va
 Later versions can add:
 
 - selective disclosure;
-- zero-knowledge predicates;
+- future-only zero-knowledge predicates, not part of v0;
 - TEE adjudication;
 - ERC-8004 identity attachment;
 - x402 payment linkage.

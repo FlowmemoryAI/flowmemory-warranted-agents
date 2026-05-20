@@ -7,6 +7,8 @@ import json
 from typing import Any
 
 from .agent_framework import run_agent_framework_demo
+from .agent_registry import run_registry_demo
+from .agent_runtime import run_runtime_demo
 from .bond_ledger import run_bond_ledger_demo
 from .checker import check_trace
 from .flowbond import demo_cases as flowbond_demo_cases
@@ -22,6 +24,8 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
     pulsepass_proofs = demo_proofs()
     private_compute = run_private_compute_demo()
     bond_ledger = run_bond_ledger_demo()
+    registry = run_registry_demo()
+    runtime = run_runtime_demo()
     flowcompiler_results = [check_trace(case) for case in flowcompiler_cases]
 
     valid = [item for item in flowcompiler_results if item["caseId"].startswith("FC-OK")]
@@ -35,6 +39,8 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
             "WorkRequest",
             "PolicyCard",
             "AgentProposal",
+            "AgentRegistry",
+            "AgentRuntime",
             "FlowBond",
             "BondLedger",
             "FlowPulse",
@@ -45,6 +51,8 @@ def build_release_transcript(flowcompiler_cases: list[dict[str, Any]]) -> dict[s
         ],
         "policyCard": public_policy_view(demo_policy_card()),
         "agentFramework": _framework_summary(framework),
+        "agentRegistry": _registry_summary(registry),
+        "agentRuntime": _runtime_summary(runtime),
         "flowBond": _flowbond_summary(flowbond_cases),
         "bondLedger": _bond_ledger_summary(bond_ledger),
         "pulsePass": {
@@ -129,6 +137,24 @@ def _flowbond_summary(cases: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _registry_summary(registry: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "agentCount": len(registry["agents"]),
+        "eligibleAgents": sum(1 for item in registry["matches"] if item["eligible"]),
+        "rejectedAgents": sum(1 for item in registry["matches"] if not item["eligible"]),
+        "matches": registry["matches"],
+    }
+
+
+def _runtime_summary(runtime: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "runCount": len(runtime["runs"]),
+        "finalStatuses": [run["finalStatus"] for run in runtime["runs"]],
+        "timelineLength": runtime["summary"]["timelineLength"],
+        "settlements": [run["settlement"]["settlement"] for run in runtime["runs"]],
+    }
+
+
 def _bond_ledger_summary(bond_ledger: dict[str, Any]) -> dict[str, Any]:
     return {
         "receiptCount": len(bond_ledger["ledger"]["receipts"]),
@@ -149,4 +175,3 @@ def _proof_summary(proof: dict[str, Any]) -> dict[str, Any]:
 def _hash_dict(payload: dict[str, Any]) -> str:
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
-

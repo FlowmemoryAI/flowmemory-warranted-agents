@@ -8,6 +8,8 @@ It summarizes:
 - AgentManifest;
 - WorkRequest;
 - AgentProposal;
+- AgentRegistry;
+- AgentRuntime;
 - FlowBond;
 - BondLedger;
 - FlowPulse;
@@ -34,6 +36,14 @@ FlowBond:
   releasedToAgent: 1
   paidToUser:      2
 
+AgentRegistry:
+  eligibleAgents: 1
+  rejectedAgents: 1
+
+AgentRuntime:
+  runs:          2
+  finalStatuses: WARRANTY_RELEASED, USER_PAID_FROM_BOND
+
 FlowCompiler:
   valid accepted:                 3/3
   impossible histories rejected:  8/8
@@ -41,4 +51,3 @@ FlowCompiler:
 ```
 
 The transcript is local evidence only. It does not claim custody, wallet enforcement, production bond adjudication, zero-knowledge privacy, TEE privacy, or production verifier infrastructure.
-

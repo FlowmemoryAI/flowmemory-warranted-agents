@@ -41,6 +41,36 @@ Negotiated user rule an agent can bond against.
 
 Agent's pre-action warranty offer against a PolicyCard.
 
+### AgentRegistry
+
+Local discovery object that matches a `WorkRequest` against registered `AgentManifest` records.
+
+Matching inputs:
+
+- required evidence;
+- requested bond units;
+- promise type.
+
+Matching outputs:
+
+- eligible flag;
+- matched evidence;
+- missing evidence;
+- rejection reasons.
+
+### AgentRuntime
+
+Deterministic local state machine for a warranted action.
+
+Required phases:
+
+- `manifest_loaded`
+- `policy_quoted`
+- `bond_locked`
+- `action_executed`
+- `flowbond_settled`
+- `private_proof_ready`
+
 ### FlowBondSettlement
 
 Settlement result after evidence is evaluated.
@@ -57,6 +87,8 @@ AgentManifest supports required evidence.
 WorkRequest asks for a supported promise.
 PolicyCard is derived.
 AgentProposal commits bond to policy hash.
+AgentRegistry confirms the agent is warrantable for the request.
+AgentRuntime records the machine history.
 Action emits evidence envelopes.
 FlowBond settles pass/fail.
 BondLedger records local lock/release/pay accounting.

@@ -11,6 +11,8 @@ AgentManifest
   -> WorkRequest
   -> PolicyCard
   -> AgentProposal
+  -> AgentRegistry
+  -> AgentRuntime
   -> FlowBond
   -> BondLedger
   -> FlowPulse
@@ -84,7 +86,44 @@ It includes:
 
 The proposal is not execution. It is a pre-action warranty offer.
 
-## Layer 5: FlowBond
+## Layer 5: AgentRegistry
+
+The `AgentRegistry` is the discovery layer.
+
+It answers one narrow question:
+
+```text
+Which agents can actually quote this warranted request?
+```
+
+It matches by:
+
+- required evidence support;
+- requested bond amount;
+- promise type.
+
+This is not a reputation marketplace. It is a warranty-eligibility filter.
+
+## Layer 6: AgentRuntime
+
+The `AgentRuntime` is the deterministic state machine:
+
+```text
+manifest_loaded
+  -> policy_quoted
+  -> bond_locked
+  -> action_executed
+  -> flowbond_settled
+  -> private_proof_ready
+```
+
+This is the whole agent framework in one inspectable history.
+
+If the agent closes the obligation, the runtime ends in `WARRANTY_RELEASED`.
+
+If the agent takes payment without the required delivery path, the runtime ends in `USER_PAID_FROM_BOND`.
+
+## Layer 7: FlowBond
 
 FlowBond settles the warranty.
 
@@ -92,7 +131,7 @@ If the required evidence closes the obligation, the bond releases to the agent.
 
 If payment happened without delivery, acceptance, or the correct obligation link, the bond pays the user.
 
-## Layer 6: BondLedger
+## Layer 8: BondLedger
 
 The local `BondLedger` models the warranty accounting path:
 
@@ -103,7 +142,7 @@ The local `BondLedger` models the warranty accounting path:
 
 This layer is local accounting only. It does not claim custody, escrow, wallet execution, or production settlement.
 
-## Layer 7: FlowPulse
+## Layer 9: FlowPulse
 
 The FlowPulse is the memory artifact.
 
@@ -120,7 +159,7 @@ It records:
 
 The action is not the memory. The FlowPulse is the memory artifact.
 
-## Layer 8: PulsePass
+## Layer 10: PulsePass
 
 PulsePass is the user's private receipt passport.
 
@@ -142,7 +181,7 @@ It hides:
 - exact action history;
 - private obligation IDs.
 
-## Layer 9: PrivateCompute
+## Layer 11: PrivateCompute
 
 The local `PrivateCompute` layer runs scoped predicate programs over PulsePass.
 
@@ -174,6 +213,8 @@ Did the agent close the promise it bonded?
 ```powershell
 python -m flowmemory_compiler.cli agent-framework-demo --pretty
 python -m flowmemory_compiler.cli agent-adapter-demo --pretty
+python -m flowmemory_compiler.cli agent-registry-demo --pretty
+python -m flowmemory_compiler.cli agent-runtime-demo --pretty
 python -m flowmemory_compiler.cli bond-ledger-demo --pretty
 python -m flowmemory_compiler.cli private-compute-demo --pretty
 ```

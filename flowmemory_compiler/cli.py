@@ -9,9 +9,12 @@ from typing import Any
 
 from .agent_framework import run_agent_framework_demo
 from .agent_adapter import run_adapter_demo
+from .agent_registry import run_registry_demo
+from .agent_runtime import run_runtime_demo
 from .bond_ledger import run_bond_ledger_demo
 from .capture import capture_command
 from .checker import check_trace
+from .claim_gate import scan_claims
 from .compiler import compile_plan, compile_trace
 from .flowbond import demo_cases as flowbond_demo_cases
 from .policycards import demo_policy_card, public_policy_view
@@ -68,6 +71,14 @@ def main(argv: list[str] | None = None) -> int:
     adapter.add_argument("--pretty", action="store_true")
     adapter.add_argument("--json", action="store_true")
 
+    registry = sub.add_parser("agent-registry-demo", help="Run warranted-agent registry and discovery demo.")
+    registry.add_argument("--pretty", action="store_true")
+    registry.add_argument("--json", action="store_true")
+
+    runtime = sub.add_parser("agent-runtime-demo", help="Run warranted-agent runtime state machine demo.")
+    runtime.add_argument("--pretty", action="store_true")
+    runtime.add_argument("--json", action="store_true")
+
     ledger = sub.add_parser("bond-ledger-demo", help="Run local bond ledger accounting demo.")
     ledger.add_argument("--pretty", action="store_true")
     ledger.add_argument("--json", action="store_true")
@@ -79,6 +90,10 @@ def main(argv: list[str] | None = None) -> int:
     transcript = sub.add_parser("release-transcript", help="Print canonical package transcript.")
     transcript.add_argument("--pretty", action="store_true")
     transcript.add_argument("--json", action="store_true")
+
+    claim_gate = sub.add_parser("claim-gate", help="Scan public copy for unguarded overclaims.")
+    claim_gate.add_argument("--pretty", action="store_true")
+    claim_gate.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -168,6 +183,22 @@ def main(argv: list[str] | None = None) -> int:
             _print_agent_adapter(demo_result)
         return 0
 
+    if args.command == "agent-registry-demo":
+        demo_result = run_registry_demo()
+        if args.json:
+            print(json.dumps(demo_result, indent=2, sort_keys=True))
+        else:
+            _print_agent_registry(demo_result)
+        return 0
+
+    if args.command == "agent-runtime-demo":
+        demo_result = run_runtime_demo()
+        if args.json:
+            print(json.dumps(demo_result, indent=2, sort_keys=True))
+        else:
+            _print_agent_runtime(demo_result)
+        return 0
+
     if args.command == "bond-ledger-demo":
         demo_result = run_bond_ledger_demo()
         if args.json:
@@ -192,6 +223,14 @@ def main(argv: list[str] | None = None) -> int:
         else:
             _print_release_transcript(transcript_result)
         return 0
+
+    if args.command == "claim-gate":
+        result = scan_claims(ROOT)
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            _print_claim_gate(result)
+        return 0 if result["passed"] else 1
 
     return 2
 
@@ -367,6 +406,38 @@ def _print_agent_adapter(result: dict[str, Any]) -> None:
     print("  The adapter boundary shows where future real agents plug into FlowMemory warranties.")
 
 
+def _print_agent_registry(result: dict[str, Any]) -> None:
+    print("FlowMemory Warranted Agent Registry")
+    print()
+    print("Request:")
+    print(f"  {result['request']['requestId']}")
+    print(f"  requestedBondUnits: {result['request']['requestedBondUnits']}")
+    print()
+    print("Matches:")
+    for match in result["matches"]:
+        status = "ELIGIBLE" if match["eligible"] else "REJECTED"
+        print(f"  {match['displayName']:<32} {status}")
+        print(f"    reasons: {', '.join(match['reasons'])}")
+        if match["missingEvidence"]:
+            print(f"    missing: {', '.join(match['missingEvidence'])}")
+    print()
+    print("Result:")
+    print("  Discovery is based on warranty evidence and bond capacity, not generic profile claims.")
+
+
+def _print_agent_runtime(result: dict[str, Any]) -> None:
+    print("FlowMemory Warranted Agent Runtime")
+    print()
+    for run in result["runs"]:
+        print(f"Run: {run['mode']} -> {run['finalStatus']}")
+        for event in run["timeline"]:
+            print(f"  {event['phase']:<20} {event['status']:<8} {event['eventHash']}")
+        print(f"  settlement: {run['settlement']['settlement']}")
+        print()
+    print("Result:")
+    print("  The runtime turns discovery, quote, bond, execution, settlement, and proof into one deterministic machine history.")
+
+
 def _print_bond_ledger(result: dict[str, Any]) -> None:
     print("FlowMemory Local Bond Ledger")
     print()
@@ -418,6 +489,14 @@ def _print_release_transcript(result: dict[str, Any]) -> None:
     print(f"  releasedToAgent: {result['flowBond']['releasedToAgent']}")
     print(f"  paidToUser:      {result['flowBond']['paidToUser']}")
     print()
+    print("AgentRegistry:")
+    print(f"  eligibleAgents: {result['agentRegistry']['eligibleAgents']}")
+    print(f"  rejectedAgents: {result['agentRegistry']['rejectedAgents']}")
+    print()
+    print("AgentRuntime:")
+    print(f"  runs:          {result['agentRuntime']['runCount']}")
+    print(f"  finalStatuses: {', '.join(result['agentRuntime']['finalStatuses'])}")
+    print()
     print("BondLedger:")
     print(f"  events: {', '.join(result['bondLedger']['events'])}")
     print()
@@ -438,6 +517,20 @@ def _print_release_transcript(result: dict[str, Any]) -> None:
     print()
     print("Non-claims:")
     print("  " + ", ".join(result["notClaims"]))
+
+
+def _print_claim_gate(result: dict[str, Any]) -> None:
+    print("FlowMemory Claim Gate")
+    print()
+    print(f"filesChecked:         {result['filesChecked']}")
+    print(f"guardedRiskMentions:  {result['guardedRiskMentions']}")
+    print(f"unguardedOverclaims:  {len(result['unguardedOverclaims'])}")
+    print(f"status:               {'PASSED' if result['passed'] else 'FAILED'}")
+    if result["unguardedOverclaims"]:
+        print()
+        print("Unguarded claims:")
+        for item in result["unguardedOverclaims"]:
+            print(f"  {item['file']}:{item['line']} [{item['phrase']}] {item['text']}")
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:

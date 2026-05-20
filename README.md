@@ -5,7 +5,7 @@ Generic agents make claims. FlowMemory agents can leave warranted receipts.
 FlowMemory Warranted Agents is a local public proof for a new agent primitive:
 
 ```text
-AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> FlowBond -> FlowPulse -> PulsePass -> ScopedProof
+AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> AgentRegistry -> AgentRuntime -> FlowBond -> FlowPulse -> PulsePass -> ScopedProof
 ```
 
 The user defines the promise. The agent bonds the promise. The action emits receipt-backed memory. The user privately carries proof of what happened.
@@ -85,6 +85,22 @@ If the agent closes the obligation with the required evidence, the bond releases
 
 If payment happened but delivery, acceptance, or the correct obligation link is missing, the bond pays the user.
 
+### AgentRegistry
+
+Discovery for warranted agents.
+
+The registry does not rank generic vibes or profile copy. It checks whether an agent can actually support the required evidence and bond amount.
+
+### AgentRuntime
+
+The deterministic state machine for a warranted action:
+
+```text
+manifest loaded -> policy quoted -> bond locked -> action executed -> FlowBond settled -> private proof ready
+```
+
+This turns the whole framework into a machine history that can be inspected, tested, and rejected when it violates the promised evidence path.
+
 ### FlowPulse
 
 The receipt-backed memory artifact.
@@ -121,7 +137,10 @@ python -m flowmemory_compiler.cli pulsepass-demo --pretty
 python -m flowmemory_compiler.cli bond-ledger-demo --pretty
 python -m flowmemory_compiler.cli private-compute-demo --pretty
 python -m flowmemory_compiler.cli agent-adapter-demo --pretty
+python -m flowmemory_compiler.cli agent-registry-demo --pretty
+python -m flowmemory_compiler.cli agent-runtime-demo --pretty
 python -m flowmemory_compiler.cli release-transcript --pretty
+python -m flowmemory_compiler.cli claim-gate --pretty
 ```
 
 Expected shape:
@@ -132,6 +151,12 @@ AgentFramework:
 
 AgentAdapter:
   boundary where future real agents plug into warranties
+
+AgentRegistry:
+  eligible agents are matched by warranty evidence and bond capacity
+
+AgentRuntime:
+  one deterministic machine history from quote to private proof
 
 PolicyCard:
   portable, hashable, bondable promise

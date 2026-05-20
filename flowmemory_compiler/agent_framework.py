@@ -2,7 +2,7 @@
 
 This module wires the primitives together:
 
-AgentManifest -> WorkRequest -> PolicyCard -> FlowBond -> FlowPulse -> PulsePass
+AgentManifest -> WorkRequest -> PolicyCard -> AgentProposal -> FlowBond -> FlowPulse -> PulsePass
 
 It is deliberately local and deterministic. It does not run a wallet, custody
 funds, call x402, or verify production chain data.
@@ -236,4 +236,3 @@ def _hash_value(value: str) -> str:
 def _hash_dict(payload: dict[str, Any]) -> str:
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
-
