@@ -10,6 +10,7 @@ from typing import Any
 from .capture import capture_command
 from .checker import check_trace
 from .compiler import compile_plan, compile_trace
+from .flowbond import demo_cases as flowbond_demo_cases
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,6 +40,10 @@ def main(argv: list[str] | None = None) -> int:
     capture.add_argument("--tree-hash", required=True)
     capture.add_argument("--observed-sequence", type=int, default=1)
     capture.add_argument("run_command", nargs=argparse.REMAINDER)
+
+    flowbond = sub.add_parser("flowbond-demo", help="Run the FlowBond warranted-action R&D demo.")
+    flowbond.add_argument("--pretty", action="store_true")
+    flowbond.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -86,6 +91,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(json.dumps(envelope, indent=2, sort_keys=True))
         return 0 if envelope["fields"]["exitCode"] == 0 else envelope["fields"]["exitCode"]
+
+    if args.command == "flowbond-demo":
+        cases = flowbond_demo_cases()
+        if args.json:
+            print(json.dumps(cases, indent=2, sort_keys=True))
+        else:
+            _print_flowbond_demo(cases)
+        return 0
 
     return 2
 
@@ -149,6 +162,28 @@ def _print_compile(program: dict[str, Any]) -> None:
     for index, item in enumerate(program.get("bindingConstraints", []), start=1):
         print(f"  B{index} {item['constraint']}")
         print(f"     because: {item['because']}")
+
+
+def _print_flowbond_demo(cases: list[dict[str, Any]]) -> None:
+    print("FlowBond R&D Demo")
+    print()
+    print("Thesis:")
+    print("  Generic agents give advice. FlowMemory agents can leave bonded receipts.")
+    print()
+    for case in cases:
+        result = case["result"]
+        passed = "PASSED" if result["passed"] else "FAILED"
+        print(f"{case['caseId']:<10} {case['label']:<32} {passed} {result['settlement']}")
+        print(f"  policyHash: {result['policyHash']}")
+        print(f"  pulseId:    {result['flowPulse']['pulseId']}")
+        if result["violations"]:
+            print(f"  violations: {', '.join(result['violations'])}")
+    print()
+    print("Result:")
+    print("  A deterministic policy turns an agent promise into a FlowPulse-settled warranty.")
+    print()
+    print("Non-claims:")
+    print("  no profit guarantee, no custody, no swap control, no fund protection, no production adjudication.")
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:

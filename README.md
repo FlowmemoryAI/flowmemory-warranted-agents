@@ -45,6 +45,12 @@ Capture one real local command as a `TestRunEnvelope`:
 python -m flowmemory_compiler.cli capture-command --step test-1 --tree-hash sha256:tree-after -- python -c "print('ok')"
 ```
 
+Run the market-facing FlowBond R&D demo:
+
+```powershell
+python -m flowmemory_compiler.cli flowbond-demo --pretty
+```
+
 Expected shape:
 
 ```text
@@ -89,3 +95,9 @@ The local `capture-command` helper records command exit code and output hashes. 
 Wallets can sign. Payments can settle. Tests can run.
 
 FlowCompiler asks whether the resulting history is admissible under declared evidence envelopes.
+
+FlowBond extends that market thesis:
+
+```text
+Generic agents give advice. FlowMemory agents can leave bonded receipts.
+```

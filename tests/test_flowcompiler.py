@@ -6,6 +6,7 @@ from pathlib import Path
 from flowmemory_compiler.capture import capture_command
 from flowmemory_compiler.checker import check_trace
 from flowmemory_compiler.compiler import compile_trace
+from flowmemory_compiler.flowbond import demo_cases as flowbond_demo_cases
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -91,6 +92,16 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(envelope["fields"]["exitCode"], 0)
         self.assertEqual(envelope["fields"]["treeHash"], "sha256:tree-after")
         self.assertTrue(envelope["fields"]["stdoutHash"].startswith("sha256:"))
+
+    def test_flowbond_demo_releases_or_pays_bond(self):
+        cases = flowbond_demo_cases()
+        self.assertEqual(len(cases), 2)
+        self.assertTrue(cases[0]["result"]["passed"])
+        self.assertEqual(cases[0]["result"]["settlement"], "RELEASE_BOND_TO_AGENT")
+        self.assertFalse(cases[1]["result"]["passed"])
+        self.assertEqual(cases[1]["result"]["settlement"], "PAY_BOND_TO_USER")
+        self.assertIn("max_slippage_exceeded", cases[1]["result"]["violations"])
+        self.assertTrue(cases[1]["result"]["flowPulse"]["pulseId"].startswith("sha256:"))
 
 
 def _case(case_id):
