@@ -260,8 +260,11 @@ Start here for review:
 
 - `docs/DEVELOPER_HANDOFF.md`
 - `docs/AGENT_FRAMEWORK_ARCHITECTURE.md`
+- `docs/ARCHITECTURE_DIAGRAMS.md`
+- `docs/THREAT_MODEL.md`
 - `docs/AGENT_RUNTIME.md`
 - `docs/AGENT_REGISTRY.md`
+- `docs/EVIDENCE_SCHEMA.md`
 - `docs/LAUNCH_CHECKLIST.md`
 - `specs/WarrantedAgentFramework.v0.md`
 
