@@ -14,6 +14,7 @@ from .checker import check_trace
 from .compiler import compile_plan, compile_trace
 from .flowbond import demo_cases as flowbond_demo_cases
 from .policycards import demo_policy_card, public_policy_view
+from .private_compute import run_private_compute_demo
 from .pulsepass import demo_passport, demo_proofs
 
 
@@ -64,6 +65,10 @@ def main(argv: list[str] | None = None) -> int:
     ledger = sub.add_parser("bond-ledger-demo", help="Run local bond ledger accounting demo.")
     ledger.add_argument("--pretty", action="store_true")
     ledger.add_argument("--json", action="store_true")
+
+    private_compute = sub.add_parser("private-compute-demo", help="Run local private memory computation demo.")
+    private_compute.add_argument("--pretty", action="store_true")
+    private_compute.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -151,6 +156,14 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(demo_result, indent=2, sort_keys=True))
         else:
             _print_bond_ledger(demo_result)
+        return 0
+
+    if args.command == "private-compute-demo":
+        demo_result = run_private_compute_demo()
+        if args.json:
+            print(json.dumps(demo_result, indent=2, sort_keys=True))
+        else:
+            _print_private_compute(demo_result)
         return 0
 
     return 2
@@ -325,6 +338,26 @@ def _print_bond_ledger(result: dict[str, Any]) -> None:
     print()
     print("Non-claims:")
     print("  local ledger only; no custody, escrow, wallet, or production settlement.")
+
+
+def _print_private_compute(result: dict[str, Any]) -> None:
+    print("FlowMemory Private Compute Demo")
+    print()
+    print(f"vaultCommitment: {result['vaultCommitment']}")
+    print()
+    print("Programs:")
+    for program in result["programResults"]:
+        status = "PASS" if program["passed"] else "FAIL"
+        print(f"  {program['programId']:<38} {status}")
+        print(f"    transcriptHash: {program['transcriptHash']}")
+        print(f"    revealed: {', '.join(sorted(program['revealed'].keys()))}")
+        print(f"    hidden: {', '.join(program['hidden'])}")
+    print()
+    print("Result:")
+    print("  Local private computation reveals scoped predicates over PulsePass without revealing raw receipts.")
+    print()
+    print("Non-claims:")
+    print("  local only; no zero-knowledge, TEE, full privacy, or production private compute.")
 
 
 def _print_forbidden_core(result: dict[str, Any]) -> None:

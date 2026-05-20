@@ -10,6 +10,7 @@ from flowmemory_compiler.checker import check_trace
 from flowmemory_compiler.compiler import compile_trace
 from flowmemory_compiler.flowbond import demo_cases as flowbond_demo_cases
 from flowmemory_compiler.policycards import demo_policy_card, policy_hash, public_policy_view
+from flowmemory_compiler.private_compute import run_private_compute_demo
 from flowmemory_compiler.pulsepass import ScopedProofRequest, build_pulsepass, demo_passport, scoped_proof
 
 
@@ -153,6 +154,14 @@ class FlowCompilerTest(unittest.TestCase):
         self.assertEqual(accounts["agent:work-warranty-demo"], 75_00)
         self.assertEqual(accounts["user:local-demo"], 25_00)
         self.assertTrue(all(receipt["receiptId"].startswith("sha256:") for receipt in receipts))
+
+    def test_private_compute_returns_scoped_transcripts(self):
+        result = run_private_compute_demo()
+        self.assertEqual(result["schema"], "flowmemory.private_compute_demo.v0")
+        self.assertEqual(len(result["programResults"]), 2)
+        self.assertTrue(all(item["transcriptHash"].startswith("sha256:") for item in result["programResults"]))
+        self.assertTrue(all("raw_receipts" in item["hidden"] for item in result["programResults"]))
+        self.assertTrue(result["programResults"][0]["passed"])
 
 
 def _case(case_id):

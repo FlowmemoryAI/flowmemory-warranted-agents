@@ -119,6 +119,7 @@ python -m flowmemory_compiler.cli policycard-demo --pretty
 python -m flowmemory_compiler.cli flowbond-demo --pretty
 python -m flowmemory_compiler.cli pulsepass-demo --pretty
 python -m flowmemory_compiler.cli bond-ledger-demo --pretty
+python -m flowmemory_compiler.cli private-compute-demo --pretty
 ```
 
 Expected shape:
@@ -140,6 +141,9 @@ PulsePass:
 
 BondLedger:
   local accounting releases one warranty to the agent and pays one warranty to the user
+
+PrivateCompute:
+  scoped predicates over PulsePass without exposing raw receipts
 ```
 
 Run the conformance engine:

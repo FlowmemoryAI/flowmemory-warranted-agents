@@ -15,6 +15,7 @@ AgentManifest
   -> BondLedger
   -> FlowPulse
   -> PulsePass
+  -> PrivateCompute
   -> ScopedProof
 ```
 
@@ -131,6 +132,19 @@ It hides:
 - exact action history;
 - private obligation IDs.
 
+## Layer 9: PrivateCompute
+
+The local `PrivateCompute` layer runs scoped predicate programs over PulsePass.
+
+It returns:
+
+- selected revealed fields;
+- hidden-field list;
+- transcript hash;
+- pass/fail result.
+
+The local v0 is not zero-knowledge, TEE-backed, or production privacy. It is the interface shape for private receipt computation.
+
 ## Why This Matters
 
 Wallets prove that a key can act.
@@ -150,6 +164,7 @@ Did the agent close the promise it bonded?
 ```powershell
 python -m flowmemory_compiler.cli agent-framework-demo --pretty
 python -m flowmemory_compiler.cli bond-ledger-demo --pretty
+python -m flowmemory_compiler.cli private-compute-demo --pretty
 ```
 
 Expected output shape:

@@ -61,6 +61,7 @@ FlowBond settles pass/fail.
 BondLedger records local lock/release/pay accounting.
 FlowPulse-style receipt records outcome.
 PulsePass stores receipt.
+PrivateCompute runs scoped predicate programs over PulsePass.
 ScopedProof reveals only a predicate.
 ```
 
