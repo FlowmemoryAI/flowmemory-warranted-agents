@@ -5,7 +5,7 @@
 FlowCompiler is a separate local R&D package at:
 
 ```text
-E:\FlowMemory\flowmemory-compiler
+the separate FlowMemory compiler R&D worktree
 ```
 
 It is intentionally outside the Uniswap v4 hook launch repo.

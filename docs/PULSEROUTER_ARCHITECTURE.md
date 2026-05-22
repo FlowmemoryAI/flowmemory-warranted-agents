@@ -123,7 +123,7 @@ The local adversary suite currently catches 26 failure modes:
 
 The next production-candidate layers are:
 
-1. OpenAI-compatible proxy endpoint.
+1. Model-provider-compatible proxy endpoint.
 2. Real provider adapters.
 3. MCP server tools.
 4. Reader/verifier service for FlowPulse evidence.

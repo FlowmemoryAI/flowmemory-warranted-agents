@@ -11,7 +11,7 @@ python -m unittest discover -s tests -p "test_*.py"
 Expected:
 
 ```text
-Ran 29 tests
+Ran all tests
 OK
 ```
 
